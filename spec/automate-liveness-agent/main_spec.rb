@@ -85,7 +85,7 @@ end
 
 RSpec.describe AutomateLivenessAgent::Config do
 
-  FIXTURES_DIR = File.expand_path("../fixtures/config", __FILE__)
+  FIXTURES_DIR = File.expand_path("../../fixtures/config", __FILE__)
 
   def fixture(name)
     File.join(FIXTURES_DIR, name)
