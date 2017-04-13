@@ -1,4 +1,4 @@
-require "automate_liveness_agent/main"
+require "automate_liveness_agent/config"
 
 RSpec.describe AutomateLivenessAgent::Config do
 
