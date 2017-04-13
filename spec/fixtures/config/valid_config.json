@@ -1,0 +1,7 @@
+{
+  "chef_server_url": "https://chef.example/organizations/default",
+  "client_key_path":  "/etc/chef/client.pem",
+  "client_name":      "testnode.example.com",
+  "unprivileged_uid": 100,
+  "unprivileged_gid": 200
+}
