@@ -1,4 +1,5 @@
 require "automate_liveness_agent/config"
+require "automate_liveness_agent/api_client"
 
 module AutomateLivenessAgent
 
@@ -35,6 +36,7 @@ module AutomateLivenessAgent
 
     attr_reader :argv
     attr_reader :config_path
+    attr_reader :config
 
     def self.run(argv)
       new(argv).run
@@ -73,11 +75,18 @@ module AutomateLivenessAgent
 
     def load_config
       @config = Config.load(config_path)
+      SUCCESS
     end
 
-    def print_usage_and_exit
-      $stderr.print("Usage: automate-liveness-agent [config_file]")
-      exit(1)
+    def set_privileges
+      SUCCESS
+    end
+
+    # TODO: prototype code
+    def send_keepalives
+      a = LivenessUpdateSender.new(config)
+      a.update
+      SUCCESS
     end
 
     def normal_exit

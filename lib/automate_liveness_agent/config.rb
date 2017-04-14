@@ -24,6 +24,8 @@ module AutomateLivenessAgent
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
 
+    attr_reader :client_key
+
     def self.load(config_path)
       c = new(config_path)
       c.load
@@ -38,6 +40,8 @@ module AutomateLivenessAgent
       @client_name =      nil
       @unprivileged_uid = nil
       @unprivileged_gid = nil
+
+      @client_key = nil
     end
 
     def load
@@ -49,6 +53,10 @@ module AutomateLivenessAgent
       sanity_check_config_path
       config_data = parse_config_file
       apply_config_values(config_data)
+    end
+
+    def load_client_key
+      @client_key = File.read(client_key_path)
     end
 
     def apply_config_values(config_data)

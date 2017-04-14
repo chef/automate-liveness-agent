@@ -65,6 +65,22 @@ RSpec.describe AutomateLivenessAgent::Main do
     end
   end
 
+  describe "loading the config" do
+
+    context "when config loading is successful" do
+
+      it "loads the config"
+
+    end
+
+    context "when config loading fails" do
+
+      it "exits 1 with the error message"
+
+    end
+
+  end
+
   it "sends an authenticated HTTP request every 30 minutes"
 
   it "reads a JSON(???) copy of the client config"

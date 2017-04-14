@@ -170,5 +170,38 @@ RSpec.describe AutomateLivenessAgent::Config do
     end
 
   end
+
+  describe "loading the client key" do
+
+    context "when the key file doesn't exist or isn't readable" do
+
+      it "raises a ConfigError"
+
+    end
+
+    context "when the key exists and is readable" do
+
+      let(:config_data) do
+        {
+          "chef_server_url"  => "https://chef.example/organizations/default",
+          "client_key_path"  => fixture("example.pem"),
+          "client_name"      => "testnode.example.com",
+          "unprivileged_uid" => 100,
+          "unprivileged_gid" => 100,
+        }
+      end
+
+      before do
+        config.apply_config_values(config_data)
+        config.load_client_key
+      end
+
+      it "loads the client key to memory" do
+        expect(config.client_key).to start_with("-----BEGIN RSA PRIVATE KEY-----")
+      end
+
+    end
+
+  end
 end
 
