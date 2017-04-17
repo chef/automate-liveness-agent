@@ -15,6 +15,20 @@
 # The `.rspec` file also contains a few flags that are not defaults but that
 # users commonly want.
 #
+
+module AutomateLivenessAgent
+  module TestHelpers
+    FIXTURES_DIR = File.expand_path("../fixtures/", __FILE__)
+
+    def fixture(name)
+      File.join(FIXTURES_DIR, name)
+    end
+  end
+end
+
+
+
+#
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -98,4 +112,6 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  config.include AutomateLivenessAgent::TestHelpers
 end

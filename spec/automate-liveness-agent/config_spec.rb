@@ -2,12 +2,6 @@ require "automate_liveness_agent/config"
 
 RSpec.describe AutomateLivenessAgent::Config do
 
-  FIXTURES_DIR = File.expand_path("../../fixtures/config", __FILE__)
-
-  def fixture(name)
-    File.join(FIXTURES_DIR, name)
-  end
-
   let(:config_path) { "/path/to/config.json" }
 
   subject(:config) { described_class.new(config_path) }
@@ -38,8 +32,6 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   describe "attempting to load an invalid config file" do
 
-    # TODO: set config_path to inside a fixtures dir so we are 100% sure about file existance
-
     let(:error) do
       raised_exception =
         begin
@@ -64,7 +56,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     context "when the config file isn't readable" do
 
-      let(:config_path) { fixture("empty_file.json") }
+      let(:config_path) { fixture("config/empty_file.json") }
 
       before do
         expect(File).to receive(:readable?).with(config_path).and_return(false)
@@ -78,7 +70,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     context "when the config file is empty" do
 
-      let(:config_path) { fixture("empty_file.json") }
+      let(:config_path) { fixture("config/empty_file.json") }
 
       it "raises a ConfigError" do
         expect(error.message).to eq("Config file '#{config_path}' is empty")
@@ -88,7 +80,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     context "when the config file isn't valid JSON" do
 
-      let(:config_path) { fixture("invalid_json.json") }
+      let(:config_path) { fixture("config/invalid_json.json") }
 
       it "raises a ConfigError" do
         expect(error.message).to eq("Config file '#{config_path}' has a JSON formatting error")
@@ -143,7 +135,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   context "after the config file is loaded" do
 
-    let(:config_path) { fixture("valid_config.json") }
+    let(:config_path) { fixture("config/valid_config.json") }
 
     before do
       config.load_config_file
@@ -184,7 +176,7 @@ RSpec.describe AutomateLivenessAgent::Config do
       let(:config_data) do
         {
           "chef_server_url"  => "https://chef.example/organizations/default",
-          "client_key_path"  => fixture("example.pem"),
+          "client_key_path"  => fixture("config/example.pem"),
           "client_name"      => "testnode.example.com",
           "unprivileged_uid" => 100,
           "unprivileged_gid" => 100,

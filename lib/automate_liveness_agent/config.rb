@@ -49,6 +49,12 @@ module AutomateLivenessAgent
       load_client_key
     end
 
+    def load_data(config_data)
+      apply_config_values(config_data)
+      load_client_key
+      self
+    end
+
     def load_config_file
       sanity_check_config_path
       config_data = parse_config_file
@@ -70,6 +76,8 @@ module AutomateLivenessAgent
       @client_name = config_data["client_name"]
       @unprivileged_uid = config_data["unprivileged_uid"]
       @unprivileged_gid = config_data["unprivileged_gid"]
+
+      self
     end
 
     private
