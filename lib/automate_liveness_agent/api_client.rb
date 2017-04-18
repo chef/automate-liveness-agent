@@ -7,55 +7,6 @@ require "uri"
 
 module AutomateLivenessAgent
 
-  class LivenessUpdateSender
-
-    attr_reader :config
-    attr_reader :api_client
-
-    DATA_TEMPLATE =<<-END_JSON_DATA
-{
-  "name": "data_bag_item_alatest_%s",
-  "json_class": "Chef::DataBagItem",
-  "chef_type": "data_bag_item",
-  "data_bag": "alatest",
-  "raw_data": {
-    "id": "%s",
-    "example": "example"
-  }
-}
-END_JSON_DATA
-
-    def initialize(config)
-      @config = config
-
-      @api_client = APIClient.new(config)
-      @api_client.load_and_verify_config
-    end
-
-    def main_loop
-      # NOTES:
-      # initial RAM on my system: 13.9MB, 59506 total obj
-      print "PROCESS ID: #{Process.pid}\n"
-      obj_counts = {}
-      loop do
-        update
-        GC.start
-        ObjectSpace.count_objects(obj_counts)
-        print "TOTAL OBJ: #{obj_counts[:TOTAL]}\n"
-      end
-    end
-
-    def update
-      @api_client.request(update_data)
-    end
-
-    def update_data
-      name = "example_" + Time.now.to_i.to_s
-      sprintf(DATA_TEMPLATE, name, name)
-    end
-
-  end
-
   class APIClient
 
     MIXLIB_AUTHN_PROTO_VERSION = "1.3".freeze
