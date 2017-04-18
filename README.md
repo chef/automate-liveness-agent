@@ -1,28 +1,21 @@
-# Automate::Liveness::Agent
+# Automate Liveness Agent
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/automate/liveness/agent`. To experiment with that code, run `bin/console` for an interactive prompt.
+Automate liveness agent sends keepalive messages to Chef Automate, which
+prevents nodes that are up but not frequently running Chef Client from
+appearing as "missing" in the Automate UI.
 
-TODO: Delete this and the text above, and describe your gem
+For more info about Chef Automate, see [https://www.chef.io/automate/](https://www.chef.io/automate/).
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'automate-liveness-agent'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install automate-liveness-agent
+Automate liveness agent is designed to be installed via Chef's "Required
+Recipe" feature, which is in development. Check back later for full
+instructions.
 
 ## Usage
 
-TODO: Write usage instructions here
+Usage instructions will be made available once this software is
+released.
 
 ## Development
 
@@ -32,5 +25,5 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/danielsdeleo/automate-liveness-agent.
+Bug reports should be filed with your support representitive.
 
