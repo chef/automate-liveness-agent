@@ -32,15 +32,19 @@ END_JSON_DATA
       @api_client.load_and_verify_config
     end
 
-    # TODO: this should hit the server once and bubble errors up if it can't
-    # connect.
-    def verify_connection
-      raise "TODO"
-      # call api_client.verify to catch simple config errors
-      # run one request, it should succeed
+    def main_loop
+      # NOTES:
+      # initial RAM on my system: 13.9MB, 59506 total obj
+      print "PROCESS ID: #{Process.pid}\n"
+      obj_counts = {}
+      loop do
+        update
+        GC.start
+        ObjectSpace.count_objects(obj_counts)
+        print "TOTAL OBJ: #{obj_counts[:TOTAL]}\n"
+      end
     end
 
-    # TODO: this should catch errors, log them and move on
     def update
       @api_client.request(update_data)
     end
@@ -72,7 +76,8 @@ END_JSON_DATA
 
     DEBUG = "DEBUG".freeze
 
-    RETRY_LIMIT = 5
+    #RETRY_LIMIT = 5
+    RETRY_LIMIT = 3
 
     ERROR = "Error".freeze
 

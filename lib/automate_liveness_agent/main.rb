@@ -1,5 +1,5 @@
 require "automate_liveness_agent/config"
-require "automate_liveness_agent/api_client"
+require "automate_liveness_agent/liveness_update_sender"
 
 module AutomateLivenessAgent
 
@@ -85,7 +85,7 @@ module AutomateLivenessAgent
     # TODO: prototype code
     def send_keepalives
       a = LivenessUpdateSender.new(config)
-      a.update
+      a.main_loop
       SUCCESS
     end
 
