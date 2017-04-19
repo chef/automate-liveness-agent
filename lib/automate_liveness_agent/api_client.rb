@@ -27,7 +27,7 @@ module AutomateLivenessAgent
 
     DEBUG = "DEBUG".freeze
 
-    RETRY_LIMIT = 5
+    RETRY_LIMIT = 2
 
     ERROR = "Error".freeze
 
