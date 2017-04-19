@@ -20,7 +20,7 @@ module AutomateLivenessAgent
 }
 END_JSON_DATA
 
-    UPDATE_INTERVAL_S = 60
+    UPDATE_INTERVAL_S = 60 * 30
 
     def initialize(config)
       @config = config
@@ -44,7 +44,7 @@ END_JSON_DATA
         update
         GC.start
         ObjectSpace.count_objects(obj_counts)
-        log("Total ruby objects: #{obj_counts[:TOTAL]}")
+        log("Total ruby objects: #{obj_counts[:TOTAL]}; Free heap slots: #{obj_counts[:FREE]}")
         sleep_time = [ next_run - Time.now.to_i, 0 ].max
         log("Waiting #{sleep_time}s until next update")
         sleep(sleep_time)
