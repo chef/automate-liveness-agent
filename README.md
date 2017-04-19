@@ -17,11 +17,47 @@ instructions.
 Usage instructions will be made available once this software is
 released.
 
+### Configuration
+
+The config file is a JSON formatted file like this:
+
+```json
+{
+  "chef_server_url": "https://chef.example/organizations/org-name",
+  "client_key_path":  "/etc/chef/client.pem",
+  "client_name":      "example-node-name",
+  "unprivileged_uid": 100,
+  "unprivileged_gid": 200
+}
+```
+
+### Environment Variables
+
+#### `DEBUG`
+
+Setting `DEBUG=1` will enable logging of HTTP request data.
+
+#### `INTERVAL`
+
+By default, the liveness agent will send an update every 30 minutes.
+Setting the `INTERVAL` variable will configure the agent to send an
+update to the specified value (in seconds).
+
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+This project is developed as a typical ruby app with bundler and rspec.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install deps:
+
+```
+bundle install
+```
+
+To run tests:
+
+```
+bundle exec rspec
+```
 
 ## Contributing
 
