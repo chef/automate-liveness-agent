@@ -20,7 +20,6 @@ module AutomateLivenessAgent
 }
 END_JSON_DATA
 
-    #UPDATE_INTERVAL_S = 60 * 30
     UPDATE_INTERVAL_S = 60
 
     def initialize(config)
@@ -37,9 +36,11 @@ END_JSON_DATA
     def main_loop
       obj_counts = {}
       log("PROCESS ID: #{Process.pid}")
+
+      interval = (ENV["INTERVAL"] || UPDATE_INTERVAL_S).to_i
       loop do
         now = Time.now.to_i
-        next_run = now + UPDATE_INTERVAL_S
+        next_run = now + interval
         update
         GC.start
         ObjectSpace.count_objects(obj_counts)
