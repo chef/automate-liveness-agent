@@ -44,11 +44,6 @@ RSpec.describe AutomateLivenessAgent::APIClient do
         expect(api_client.uri.to_s).to eq("https://chef.example/organizations/default")
       end
 
-      # TODO: this would break the prototype b/c the real endpoint isn't
-      # available for testing yet. Obviously we need this for the production
-      # version.
-      it "sets the URI path to the data collector endpoint"
-
       it "sets the base request params for auth" do
         expected = {
           http_method: "POST",
@@ -67,12 +62,6 @@ RSpec.describe AutomateLivenessAgent::APIClient do
         expect(api_client.http.read_timeout).to eq(10)
         expect(api_client.http.ssl_timeout).to eq(10)
       end
-
-      it "configures OpenSSL verify modes"
-
-      it "configures OpenSSL cert paths"
-
-      it "configures OpenSSL for trusted certs"
 
     end
 
