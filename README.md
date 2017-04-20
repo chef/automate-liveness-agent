@@ -43,6 +43,16 @@ By default, the liveness agent will send an update every 30 minutes.
 Setting the `INTERVAL` variable will configure the agent to send an
 update to the specified value (in seconds).
 
+#### `RUBYOPT`
+
+Pending some in-progress improvements, this application is designed to
+run with rubygems disabled. This can be done by setting `RUBYOPT` like
+so:
+
+```
+RUBYOPT="--disable-gems"
+```
+
 ## Development
 
 This project is developed as a typical ruby app with bundler and rspec.
