@@ -76,21 +76,18 @@ module AutomateLivenessAgent
     def load_config
       @config = Config.load(config_path)
       SUCCESS
+    rescue ConfigError => e
+      [ 1, e.to_s ]
     end
 
     def set_privileges
       SUCCESS
     end
 
-    # TODO: prototype code
     def send_keepalives
       a = LivenessUpdateSender.new(config)
       a.main_loop
       SUCCESS
-    end
-
-    def normal_exit
-      Kernel.exit(0)
     end
 
   end

@@ -67,35 +67,46 @@ RSpec.describe AutomateLivenessAgent::Main do
 
   describe "loading the config" do
 
+    let(:argv) { %w{ /path/to/config.json } }
+
+    before { application.handle_argv }
+
     context "when config loading is successful" do
 
-      it "loads the config"
+      it "loads the config" do
+        expect(AutomateLivenessAgent::Config).to receive(:load).with(argv.first)
+        expect(application.load_config).to eq(described_class::SUCCESS)
+      end
 
     end
 
     context "when config loading fails" do
 
-      it "exits 1 with the error message"
+      it "exits 1 with the error message" do
+        expect(AutomateLivenessAgent::Config).to receive(:load).
+          with(argv.first).
+          and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
+        expected = [ 1, "explanation of problem" ]
+        expect(application.load_config).to eq(expected)
+      end
 
     end
 
   end
 
-  it "sends an authenticated HTTP request every 30 minutes"
+  describe "running the main loop" do
 
-  it "reads a JSON(???) copy of the client config"
+    let(:update_sender) { instance_double("AutomateLivenessAgent::LivenessUpdateSender") }
 
-  it "reads config files and key and then drops privileges"
+    it "runs the update sender's main loop" do
+      expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
+        with(application.config).
+        and_return(update_sender)
+      expect(update_sender).to receive(:main_loop)
+      expect(application.send_keepalives).to eq(described_class::SUCCESS)
+    end
 
-  it "supports the rubies used by Chef 12 and Chef 13"
-
-  it "can run in the foreground"
-
-  it "can run daemonized"
-
-  it "detects a chef-client uninstall and shuts down"
-
-  it "can run in a stress test mode that is designed to surface memory leaks"
+  end
 
 end
 
