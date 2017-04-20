@@ -98,12 +98,30 @@ RSpec.describe AutomateLivenessAgent::Main do
 
     let(:update_sender) { instance_double("AutomateLivenessAgent::LivenessUpdateSender") }
 
-    it "runs the update sender's main loop" do
-      expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-        with(application.config).
-        and_return(update_sender)
-      expect(update_sender).to receive(:main_loop)
-      expect(application.send_keepalives).to eq(described_class::SUCCESS)
+    context "with a valid configuration" do
+
+      it "runs the update sender's main loop" do
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
+          with(application.config).
+          and_return(update_sender)
+        expect(update_sender).to receive(:main_loop)
+        expect(application.send_keepalives).to eq(described_class::SUCCESS)
+      end
+
+    end
+
+    context "with an invalid key or URI" do
+
+      it "exits 1 with the error message" do
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
+          with(application.config).
+          and_return(update_sender)
+        expect(update_sender).to receive(:main_loop).
+          and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
+        expected = [ 1, "explanation of problem" ]
+        expect(application.send_keepalives).to eq(expected)
+      end
+
     end
 
   end

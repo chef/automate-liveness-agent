@@ -88,6 +88,8 @@ module AutomateLivenessAgent
       a = LivenessUpdateSender.new(config)
       a.main_loop
       SUCCESS
+    rescue ConfigError => e
+      [ 1, e.to_s ]
     end
 
   end
