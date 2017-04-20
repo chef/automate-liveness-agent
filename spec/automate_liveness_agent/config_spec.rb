@@ -165,23 +165,35 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   describe "loading the client key" do
 
+
+    let(:config_data) do
+      {
+        "chef_server_url"  => "https://chef.example/organizations/default",
+        "client_key_path"  => client_key_path,
+        "client_name"      => "testnode.example.com",
+        "unprivileged_uid" => 100,
+        "unprivileged_gid" => 100,
+      }
+    end
+
     context "when the key file doesn't exist or isn't readable" do
 
-      it "raises a ConfigError"
+      let(:client_key_path) { fixture("config/no_such_key.pem") }
+
+      before do
+        config.apply_config_values(config_data)
+      end
+
+      it "raises a ConfigError" do
+
+        expect { config.load_client_key }.to raise_error(AutomateLivenessAgent::ConfigError)
+      end
 
     end
 
     context "when the key exists and is readable" do
 
-      let(:config_data) do
-        {
-          "chef_server_url"  => "https://chef.example/organizations/default",
-          "client_key_path"  => fixture("config/example.pem"),
-          "client_name"      => "testnode.example.com",
-          "unprivileged_uid" => 100,
-          "unprivileged_gid" => 100,
-        }
-      end
+      let(:client_key_path) { fixture("config/example.pem") }
 
       before do
         config.apply_config_values(config_data)

@@ -62,6 +62,10 @@ module AutomateLivenessAgent
     end
 
     def load_client_key
+      if !(File.exist?(client_key_path) && File.readable?(client_key_path))
+        raise ConfigError,
+          "Configured client_key_path '#{client_key_path}' does not exist or is not readable (current uid: #{Process.uid})"
+      end
       @client_key = File.read(client_key_path)
     end
 
