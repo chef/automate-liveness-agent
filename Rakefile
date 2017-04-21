@@ -2,6 +2,8 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 require "automatiek"
 
+require File.expand_path("../tasks/compile", __FILE__)
+
 task :default => :spec
 RSpec::Core::RakeTask.new(:spec)
 
@@ -25,3 +27,4 @@ Automatiek::RakeTask.new("mixlib-authentication") do |lib|
   end
   lib.send(:extend, mixin)
 end
+
