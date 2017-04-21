@@ -1,9 +1,9 @@
 require "automate_liveness_agent/version"
 require "automate_liveness_agent/config"
 require "openssl"
-require "mixlib/authentication/signedheaderauth"
 require "net/http"
 require "uri"
+require "automate_liveness_agent/vendor/mixlib-authentication/lib/mixlib/authentication/signedheaderauth"
 
 module AutomateLivenessAgent
 
