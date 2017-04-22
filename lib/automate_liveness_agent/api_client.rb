@@ -158,13 +158,13 @@ module AutomateLivenessAgent
     end
 
     def parse_uri
-      @uri = URI(config.chef_server_url)
+      @uri = URI(config.data_collector_url)
       unless VALID_PROTOCOLS.include?(uri.scheme)
-        raise ConfigError, "Chef Server URL '#{config.chef_server_url}' is invalid: only 'http' and 'https' protocols are supported"
+        raise ConfigError, "Data Collector URL '#{config.data_collector_url}' is invalid: only 'http' and 'https' protocols are supported"
       end
       @uri
     rescue URI::InvalidURIError => e
-      raise ConfigError, "Chef Server URL '#{config.chef_server_url}' is malformed (#{e})"
+      raise ConfigError, "Data Collector URL '#{config.data_collector_url}' is malformed (#{e})"
     end
 
     def set_base_request_params

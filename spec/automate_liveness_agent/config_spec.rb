@@ -92,11 +92,14 @@ RSpec.describe AutomateLivenessAgent::Config do
 
       BASE_CONFIG_DATA =
         {
-          "chef_server_url"  => "https://chef.example/organizations/default",
-          "client_key_path"  => "/etc/chef/client.pem",
-          "client_name"      => "testnode.example.com",
-          "unprivileged_uid" => 100,
-          "unprivileged_gid" => 100,
+          "chef_server_fqdn"   => "chef.example",
+          "client_key_path"    => "/etc/chef/client.pem",
+          "client_name"        => "testnode.example.com",
+          "data_collector_url" => "https://chef.example/organizations/default/data-collector",
+          "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+          "org_name"           => "default",
+          "unprivileged_uid"   => 100,
+          "unprivileged_gid"   => 100,
         }
 
       BASE_CONFIG_DATA.each_key do |key|
@@ -119,8 +122,8 @@ RSpec.describe AutomateLivenessAgent::Config do
         let(:config_data) { {} }
 
         let(:expected_message) do
-          "Config file '#{config_path}' is missing mandatory setting(s): "\
-            "'chef_server_url','client_key_path','client_name','unprivileged_uid','unprivileged_gid'"
+          "Config file '#{config_path}' is missing mandatory setting(s): " <<
+            BASE_CONFIG_DATA.keys.map { |k| "'#{k}'" }.join(",")
         end
 
         it "raises a ConfigError" do
@@ -141,16 +144,24 @@ RSpec.describe AutomateLivenessAgent::Config do
       config.load_config_file
     end
 
-    it "has a Chef Server URL" do
-      expect(config.chef_server_url).to eq("https://chef.example/organizations/default")
-    end
-
     it "has a client key path" do
       expect(config.client_key_path).to eq("/etc/chef/client.pem")
     end
 
     it "has a client name" do
       expect(config.client_name).to eq("testnode.example.com")
+    end
+
+    it "has a Chef Server FQDN" do
+      expect(config.chef_server_fqdn).to eq("chef.example")
+    end
+
+    it "has a Data Collector URL" do
+      expect(config.data_collector_url).to eq("https://chef.example/organizations/default/data-collector")
+    end
+
+    it "has an org name" do
+      expect(config.org_name).to eq("default")
     end
 
     it "has a UID to drop privileges to" do
@@ -165,14 +176,16 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   describe "loading the client key" do
 
-
     let(:config_data) do
       {
-        "chef_server_url"  => "https://chef.example/organizations/default",
-        "client_key_path"  => client_key_path,
-        "client_name"      => "testnode.example.com",
-        "unprivileged_uid" => 100,
-        "unprivileged_gid" => 100,
+        "client_key_path"    => client_key_path,
+        "client_name"        => "testnode.example.com",
+        "chef_server_fqdn"   => "chef.example",
+        "data_collector_url" => "https://chef.example/organizations/default/data-collector",
+        "org_name"           => "deafault",
+        "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+        "unprivileged_uid"   => 100,
+        "unprivileged_gid"   => 100,
       }
     end
 
@@ -208,4 +221,3 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   end
 end
-
