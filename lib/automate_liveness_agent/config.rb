@@ -7,6 +7,7 @@ module AutomateLivenessAgent
   class Config
 
     DEFAULT_CONFIG_PATH = "/etc/chef/config.json".freeze
+    DEFAULT_VERIFY_MODE = "verify_peer".freeze
 
     MANDATORY_CONFIG_SETTINGS = %w{
       chef_server_fqdn
@@ -23,10 +24,15 @@ module AutomateLivenessAgent
     attr_reader :chef_server_fqdn
     attr_reader :client_key
     attr_reader :client_key_path
+    attr_reader :client_key
     attr_reader :client_name
     attr_reader :data_collector_url
     attr_reader :entity_uuid
     attr_reader :org_name
+    attr_reader :ssl_verify_mode
+    attr_reader :ssl_ca_file
+    attr_reader :ssl_ca_path
+    attr_reader :trusted_certs_dir
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
 
@@ -45,6 +51,10 @@ module AutomateLivenessAgent
       @data_collector_url = nil
       @entity_uuid        = nil
       @org_name           = nil
+      @ssl_verify_mode    = DEFAULT_VERIFY_MODE
+      @ssl_ca_file        = nil
+      @ssl_ca_path        = nil
+      @trusted_certs_dir  = nil
       @unprivileged_uid   = nil
       @unprivileged_gid   = nil
     end
@@ -80,6 +90,7 @@ module AutomateLivenessAgent
         raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): '#{missing_settings.join("','")}'"
       end
 
+      # Mandatory config
       @chef_server_fqdn   = config_data["chef_server_fqdn"]
       @client_key_path    = config_data["client_key_path"]
       @client_name        = config_data["client_name"]
@@ -89,10 +100,63 @@ module AutomateLivenessAgent
       @unprivileged_uid   = config_data["unprivileged_uid"]
       @unprivileged_gid   = config_data["unprivileged_gid"]
 
+      # Optional config
+      if config_data.key?("ssl_verify_mode") && !!config_data["ssl_verify_mode"]
+        sanity_check_ssl_verify_mode(config_data["ssl_verify_mode"])
+      end
+
+      if config_data.key?("ssl_ca_file") && !!config_data["ssl_ca_file"]
+        sanity_check_ssl_ca_file(config_data["ssl_ca_file"])
+      end
+
+      if config_data.key?("ssl_ca_path") && !!config_data["ssl_ca_path"]
+        sanity_check_ssl_ca_path(config_data["ssl_ca_path"])
+      end
+
+      if config_data.key?("trusted_certs_dir") && !!config_data["trusted_certs_dir"]
+        sanity_check_trusted_certs_dir(config_data["trusted_certs_dir"])
+      end
+
       self
     end
 
     private
+
+    def sanity_check_ssl_verify_mode(verify_mode)
+      if verify_mode =~ /^verify_(peer|none)$/
+        @ssl_verify_mode = verify_mode
+      else
+        raise(
+          ConfigError,
+          "'#{verify_mode}' is not a valid ssl_verify_mode."\
+          " Valid options are 'verify_peer' and 'verify_none'."
+        )
+      end
+    end
+
+    def sanity_check_ssl_ca_path(ca_path)
+      if File.directory?(ca_path)
+        @ssl_ca_path = ca_path
+      else
+        raise ConfigError, "ssl_ca_path '#{ca_path}' is not a directory"
+      end
+    end
+
+    def sanity_check_ssl_ca_file(ca_file)
+      if File.exist?(ca_file)
+        @ssl_ca_file = ca_file
+      else
+        raise ConfigError, "ssl_ca_file '#{ca_file}' does not exist"
+      end
+    end
+
+    def sanity_check_trusted_certs_dir(dir)
+      if File.directory?(dir)
+        @trusted_certs_dir = dir
+      else
+        raise ConfigError, "trusted_certs_dir '#{dir}' is not a directory"
+      end
+    end
 
     def parse_config_file
       JSON.parse(File.read(config_path))
@@ -114,6 +178,5 @@ module AutomateLivenessAgent
         raise ConfigError, "Config file '#{config_path}' is empty"
       end
     end
-
   end
 end

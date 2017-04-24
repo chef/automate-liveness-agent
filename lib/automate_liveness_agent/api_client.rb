@@ -33,6 +33,8 @@ module AutomateLivenessAgent
 
     SUCCESS = "Success".freeze
 
+    HTTPS_SCHEME = "https".freeze
+
     attr_reader :config
     attr_reader :uri
     attr_reader :base_request_params
@@ -122,7 +124,6 @@ module AutomateLivenessAgent
     def send_request(req)
       if ENV[DEBUG]
         puts "Request Data ".ljust(80, "=")
-        require 'pp'
         JSON.parse(req.body) # will fail if req body is malformed
         print "req:       #{req.inspect}\n"
         print "uri:       #{uri}\n"
@@ -181,10 +182,25 @@ module AutomateLivenessAgent
     # TODO: make sure we set the timeout stuff to reasonable values
     def setup_http_client
       @http = Net::HTTP.new(uri.hostname, uri.port).tap do |h|
-        h.use_ssl = true
-        h.open_timeout  = 10
-        h.read_timeout  = 10
-        h.ssl_timeout   = 10
+        h.open_timeout = 10
+        h.read_timeout = 10
+        h.ssl_timeout  = 10
+        h.use_ssl      = uri.scheme == HTTPS_SCHEME
+        h.verify_mode  = OpenSSL::SSL.const_get(config.ssl_verify_mode.upcase)
+        h.ca_path      = config.ssl_ca_path if config.ssl_ca_path
+        h.ca_file      = config.ssl_ca_file if config.ssl_ca_file
+        h.cert_store   = OpenSSL::X509::Store.new
+        h.cert_store.set_default_paths
+        if !config.trusted_certs_dir.nil? && File.directory?(config.trusted_certs_dir)
+          Dir.glob(File.join(config.trusted_certs_dir, "*.{crt,pem}")).each do |crt|
+            begin
+              h.cert_store.add_cert(OpenSSL::X509::Certificate.new(File.read(crt)))
+            rescue OpenSSL::X509::StoreError => e
+              # The cert is probably invalid or already in the table
+              print e.message if ENV[DEBUG]
+            end
+          end
+        end
       end
     end
   end
