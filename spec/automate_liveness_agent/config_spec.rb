@@ -1,5 +1,3 @@
-require "automate_liveness_agent/config"
-
 RSpec.describe AutomateLivenessAgent::Config do
 
   let(:config_path) { "/path/to/config.json" }

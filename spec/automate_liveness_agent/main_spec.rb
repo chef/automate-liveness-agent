@@ -1,5 +1,3 @@
-require "automate_liveness_agent/main"
-
 RSpec.describe AutomateLivenessAgent::Main do
 
   let(:argv) { [] }

@@ -4,4 +4,4 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 
 require "automate_liveness_agent/main"
 
-AutomateLivenessAgent::Main.run(ARGV)
+AutomateLivenessAgent::Main.run(ARGV) unless ENV["AUTOMATE_LIVENESS_AGENT_SPECS_MODE"]
