@@ -48,6 +48,7 @@ module CompileToFile
         end
       end
       File.chmod(0755, output_file)
+      puts("compiled application to #{output_file}")
     end
   end
 end
