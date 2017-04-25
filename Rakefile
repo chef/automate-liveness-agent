@@ -5,6 +5,7 @@ require "automatiek"
 require File.expand_path("../tasks/compile", __FILE__)
 
 task :default => :spec
+task :spec => :compile
 RSpec::Core::RakeTask.new(:spec)
 
 # Vendor Mixlib::Authentication and update all vendored 'require' entries
