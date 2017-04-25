@@ -1,7 +1,10 @@
 {
-  "chef_server_url": "https://chef.example/organizations/default",
-  "client_key_path":  "/etc/chef/client.pem",
-  "client_name":      "testnode.example.com",
+  "client_key_path": "/etc/chef/client.pem",
+  "client_name": "testnode.example.com",
+  "chef_server_fqdn": "chef.example",
+  "data_collector_url": "https://chef.example/organizations/default/data-collector",
+  "org_name": "default",
+  "entity_uuid": "d4a509ca-bc15-422d-8a17-1f3903856bc4",
   "unprivileged_uid": 100,
   "unprivileged_gid": 200
 }

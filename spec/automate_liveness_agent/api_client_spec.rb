@@ -6,15 +6,18 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
   let(:client_key_path) { fixture("config/example.pem") }
 
-  let(:chef_server_url) { "https://chef.example/organizations/default" }
+  let(:data_collector_url) { "https://chef.example/organizations/default/data-collector" }
 
   let(:config_data) do
     {
-      "chef_server_url"  => chef_server_url,
-      "client_key_path"  => client_key_path,
-      "client_name"      => "testnode.example.com",
-      "unprivileged_uid" => 100,
-      "unprivileged_gid" => 100,
+      "chef_server_fqdn"   => "chef.example",
+      "client_key_path"    => client_key_path,
+      "client_name"        => "testnode.example.com",
+      "data_collector_url" => data_collector_url,
+      "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+      "org_name"           => "default",
+      "unprivileged_uid"   => 100,
+      "unprivileged_gid"   => 100,
     }
   end
 
@@ -41,13 +44,13 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
       it "sets the API service URI" do
         expect(api_client.uri).to be_a(URI::Generic)
-        expect(api_client.uri.to_s).to eq("https://chef.example/organizations/default")
+        expect(api_client.uri.to_s).to eq("https://chef.example/organizations/default/data-collector")
       end
 
       it "sets the base request params for auth" do
         expected = {
           http_method: "POST",
-          path: "/organizations/default",
+          path: "/organizations/default/data-collector",
           host: "chef.example:443",
           headers: described_class::BASE_HEADERS,
           user_id: "testnode.example.com",
@@ -85,12 +88,12 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
     end
 
-    context "when the Chef Server URL is not a valid URI" do
+    context "when the Data Collector URL is not a valid URI" do
 
-      let(:chef_server_url) { "Lobster Bisque" }
+      let(:data_collector_url) { "Lobster Bisque" }
 
-      it "raises a ConfigError"do
-        expected_message = "Chef Server URL 'Lobster Bisque' is malformed (bad URI(is not URI?): Lobster Bisque)"
+      it "raises a ConfigError" do
+        expected_message = "Data Collector URL 'Lobster Bisque' is malformed (bad URI(is not URI?): Lobster Bisque)"
         expect { api_client.load_and_verify_config }.
           to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
       end
@@ -99,10 +102,10 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
     context "when the Chef Server URL is a valid URI with a bizzaro protocol" do
 
-      let(:chef_server_url) { "telnet://towel.blinkenlights.nl" }
+      let(:data_collector_url) { "telnet://towel.blinkenlights.nl" }
 
       it "raises a ConfigError" do
-        expected_message = "Chef Server URL 'telnet://towel.blinkenlights.nl' is invalid: only 'http' and 'https' protocols are supported"
+        expected_message = "Data Collector URL 'telnet://towel.blinkenlights.nl' is invalid: only 'http' and 'https' protocols are supported"
         expect { api_client.load_and_verify_config }.
           to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
       end

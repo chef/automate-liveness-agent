@@ -9,22 +9,26 @@ module AutomateLivenessAgent
     DEFAULT_CONFIG_PATH = "/etc/chef/config.json".freeze
 
     MANDATORY_CONFIG_SETTINGS = %w{
-      chef_server_url
+      chef_server_fqdn
       client_key_path
       client_name
+      data_collector_url
+      entity_uuid
+      org_name
       unprivileged_uid
       unprivileged_gid
     }.freeze
 
     attr_reader :config_path
-
-    attr_reader :chef_server_url
+    attr_reader :chef_server_fqdn
+    attr_reader :client_key
     attr_reader :client_key_path
     attr_reader :client_name
+    attr_reader :data_collector_url
+    attr_reader :entity_uuid
+    attr_reader :org_name
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
-
-    attr_reader :client_key
 
     def self.load(config_path)
       c = new(config_path)
@@ -33,15 +37,16 @@ module AutomateLivenessAgent
     end
 
     def initialize(config_path)
-      @config_path = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
-
-      @chef_server_url =  nil
-      @client_key_path =  nil
-      @client_name =      nil
-      @unprivileged_uid = nil
-      @unprivileged_gid = nil
-
-      @client_key = nil
+      @config_path        = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
+      @chef_server_fqdn   = nil
+      @client_key         = nil
+      @client_key_path    = nil
+      @client_name        = nil
+      @data_collector_url = nil
+      @entity_uuid        = nil
+      @org_name           = nil
+      @unprivileged_uid   = nil
+      @unprivileged_gid   = nil
     end
 
     def load
@@ -75,11 +80,14 @@ module AutomateLivenessAgent
         raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): '#{missing_settings.join("','")}'"
       end
 
-      @chef_server_url = config_data["chef_server_url"]
-      @client_key_path = config_data["client_key_path"]
-      @client_name = config_data["client_name"]
-      @unprivileged_uid = config_data["unprivileged_uid"]
-      @unprivileged_gid = config_data["unprivileged_gid"]
+      @chef_server_fqdn   = config_data["chef_server_fqdn"]
+      @client_key_path    = config_data["client_key_path"]
+      @client_name        = config_data["client_name"]
+      @data_collector_url = config_data["data_collector_url"]
+      @entity_uuid        = config_data["entity_uuid"]
+      @org_name           = config_data["org_name"]
+      @unprivileged_uid   = config_data["unprivileged_uid"]
+      @unprivileged_gid   = config_data["unprivileged_gid"]
 
       self
     end
@@ -109,4 +117,3 @@ module AutomateLivenessAgent
 
   end
 end
-

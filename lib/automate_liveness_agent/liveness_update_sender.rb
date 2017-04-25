@@ -1,4 +1,5 @@
 require "automate_liveness_agent/api_client"
+require "time"
 
 module AutomateLivenessAgent
 
@@ -6,19 +7,6 @@ module AutomateLivenessAgent
 
     attr_reader :config
     attr_reader :api_client
-
-    DATA_TEMPLATE =<<-END_JSON_DATA
-{
-  "name": "data_bag_item_alatest_%s",
-  "json_class": "Chef::DataBagItem",
-  "chef_type": "data_bag_item",
-  "data_bag": "alatest",
-  "raw_data": {
-    "id": "%s",
-    "example": "example"
-  }
-}
-END_JSON_DATA
 
     UPDATE_INTERVAL_S = 60 * 30
 
@@ -55,15 +43,23 @@ END_JSON_DATA
     end
 
     def update
-      api_client.request(update_data)
+      api_client.request(update_payload)
     end
 
-    def update_data
-      name = "example_" + Time.now.to_i.to_s
-      sprintf(DATA_TEMPLATE, name, name)
+    def base_payload
+      @base_payload ||= {
+        "chef_server_fqdn" => config.chef_server_fqdn,
+        "source" => "liveness_agent",
+        "message_version" => "0.0.1",
+        "message_type" => "node_ping",
+        "organization_name" => config.org_name,
+        "node_name" => config.client_name,
+        "entity_uuid" => config.entity_uuid,
+      }.freeze
     end
 
+    def update_payload
+      base_payload.merge("@timestamp" => Time.now.utc.iso8601).to_json
+    end
   end
 end
-
-
