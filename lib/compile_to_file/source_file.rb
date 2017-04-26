@@ -1,6 +1,16 @@
 module CompileToFile
   class SourceFile
 
+    # Match anything that starts with space and then an octothorpe, but not if
+    # the next character is `{` because that could be string interpolation in a
+    # heredoc, e.g.,
+    #     foo = <<-EOH
+    #     #{interpolated_thing}
+    #     EOH
+    RUBY_COMMENT = /^\s*#[^{\n]*\n/.freeze
+    EMPTY_LINE = /^\n/.freeze
+    EMPTY_STRING = "".freeze
+
     attr_reader :path
     attr_reader :swaps
     attr_reader :skip_requires
@@ -31,9 +41,9 @@ module CompileToFile
         swaps.each { |s| s.apply_to!(code, path) }
 
         # Strip comments and shebangs
-        code.gsub!(/^\s*#.*\n/, "")
+        code.gsub!(RUBY_COMMENT, EMPTY_STRING)
         # Strip empty lines
-        code.gsub!(/^\n/, "")
+        code.gsub!(EMPTY_LINE, EMPTY_STRING)
         # Remove internal requires
         skip_requires.each do |require_path|
           code.gsub!(/^require \"#{require_path}.*\n/, "")
