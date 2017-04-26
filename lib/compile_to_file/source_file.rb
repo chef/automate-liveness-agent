@@ -46,7 +46,7 @@ module CompileToFile
         code.gsub!(EMPTY_LINE, EMPTY_STRING)
         # Remove internal requires
         skip_requires.each do |require_path|
-          code.gsub!(/^require \"#{require_path}.*\n/, "")
+          code.gsub!(/^require \"#{require_path}.*[\n,;]/, "")
         end
 
         processed << code
