@@ -1,5 +1,3 @@
-require "automate_liveness_agent/liveness_update_sender"
-
 RSpec.describe AutomateLivenessAgent::LivenessUpdateSender do
   let(:config) do
     AutomateLivenessAgent::Config.new("/etc/chef/agent.json").load_data(

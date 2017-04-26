@@ -17,6 +17,7 @@ if ENV["TEST_BUILD_ARTIFACT"]
   load File.expand_path("../../build/automate-liveness-agent", __FILE__)
 else
   require "automate_liveness_agent/api_client"
+  require "automate_liveness_agent/liveness_update_sender"
   require "automate_liveness_agent/config"
   require "automate_liveness_agent/main"
 end
