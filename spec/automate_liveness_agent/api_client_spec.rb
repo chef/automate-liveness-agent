@@ -8,6 +8,14 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
   let(:data_collector_url) { "https://chef.example/organizations/default/data-collector" }
 
+  let(:ssl_verify_mode) { "verify_peer" }
+
+  let(:ssl_ca_file) { nil }
+
+  let(:ssl_ca_path) { nil }
+
+  let(:trusted_certs_dir) { nil }
+
   let(:config_data) do
     {
       "chef_server_fqdn"   => "chef.example",
@@ -16,6 +24,10 @@ RSpec.describe AutomateLivenessAgent::APIClient do
       "data_collector_url" => data_collector_url,
       "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
       "org_name"           => "default",
+      "ssl_verify_mode"    => ssl_verify_mode,
+      "ssl_ca_file"        => ssl_ca_file,
+      "ssl_ca_path"        => ssl_ca_path,
+      "trusted_certs_dir"  => trusted_certs_dir,
       "unprivileged_uid"   => 100,
       "unprivileged_gid"   => 100,
     }
@@ -60,10 +72,7 @@ RSpec.describe AutomateLivenessAgent::APIClient do
       end
 
       it "configures a Net::HTTP client" do
-        expect(api_client.http.use_ssl?).to be(true)
-        expect(api_client.http.open_timeout).to eq(10)
-        expect(api_client.http.read_timeout).to eq(10)
-        expect(api_client.http.ssl_timeout).to eq(10)
+        expect(api_client.http).to be_instance_of(Net::HTTP)
       end
 
     end
@@ -221,4 +230,87 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
   end
 
+  describe "setting up the HTTP Client" do
+    context "default config" do
+      it "uses and verifies SSL" do
+        api_client.load_and_verify_config
+        expect(api_client.http.use_ssl?).to eq(true)
+        expect(api_client.http.verify_mode).to eq(OpenSSL::SSL::VERIFY_PEER)
+      end
+    end
+
+    context "ssl_verify_mode verify_none" do
+      let(:ssl_verify_mode) { "verify_none" }
+
+      it "disables SSL verification" do
+        api_client.load_and_verify_config
+        expect(api_client.http.verify_mode).to eq(OpenSSL::SSL::VERIFY_NONE)
+      end
+    end
+
+    context "invalid ssl mode" do
+      let(:ssl_verify_mode) { "verify_beer" }
+
+      it "raises an error" do
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, /not a valid ssl_verify_mode/)
+      end
+    end
+
+    context "with a trusted_certs_dir" do
+      let(:trusted_cert_path) { fixture("trusted_certs/chef-example.crt") }
+      let(:trusted_cert) { OpenSSL::X509::Certificate.new(File.read(trusted_cert_path)) }
+      let(:trusted_certs_dir) { File.dirname(trusted_cert_path) }
+
+      it "verifies trusted trusted certs" do
+        api_client.load_and_verify_config
+        expect(api_client.http.cert_store.verify(trusted_cert)).to be_truthy
+      end
+    end
+
+    context "invalid trusted_certs_dir" do
+      let(:trusted_certs_dir) { "/not/a/real/directory" }
+
+      it "raises an error" do
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, /not a directory/)
+      end
+    end
+
+    context "with a ca file" do
+      let(:ssl_ca_file) { fixture("config/example.pem") }
+
+      it "sets the ca file" do
+        api_client.load_and_verify_config
+        expect(api_client.http.ca_file).to eq(ssl_ca_file)
+      end
+    end
+
+    context "invalid ca file" do
+      let(:ssl_ca_file) { "/not/a/ca/file" }
+
+      it "raises an error" do
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, /does not exist/)
+      end
+    end
+
+    context "with a ca path" do
+      let(:ssl_ca_path) { fixture("config") }
+
+      it "sets the ca path" do
+        api_client.load_and_verify_config
+        expect(api_client.http.ca_path).to eq(ssl_ca_path)
+      end
+    end
+
+    context "invalid ca path" do
+      let(:ssl_ca_path) { "/not/a/ca/path" }
+
+      it "raises an error" do
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, /not a directory/)
+      end
+    end
+  end
 end
