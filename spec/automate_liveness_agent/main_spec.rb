@@ -92,6 +92,59 @@ RSpec.describe AutomateLivenessAgent::Main do
 
   end
 
+  describe "changing privileges" do
+
+    let(:config_data) do
+      {
+        "chef_server_fqdn" => "",
+        "client_key_path" => fixture("config/example.pem"),
+        "client_name" => "",
+        "data_collector_url" => "",
+        "entity_uuid" => "",
+        "org_name" => "",
+        "unprivileged_uid" => uid,
+        "unprivileged_gid" => gid,
+      }
+    end
+
+    before do
+      application.config.load_data(config_data)
+    end
+
+    context "when privilege dropping is disabled" do
+
+      let(:uid) { nil }
+      let(:gid) { nil }
+
+      it "does not change uid or gid" do
+        expect(Process).to_not receive(:uid=)
+        expect(Process).to_not receive(:gid=)
+        application.set_privileges
+      end
+
+    end
+
+    context "when configured to drop privileges" do
+
+      let(:uid) { 100 }
+      let(:gid) { 200 }
+
+      it "sets uid and gid" do
+        expect(Process).to receive(:uid=).with(100)
+        expect(Process).to receive(:gid=).with(200)
+        application.set_privileges
+      end
+
+      it "resues permissions errors and returns an error message" do
+        expect(Process).to receive(:gid=).with(200).and_raise(Errno::EPERM, "not allowed")
+        expected_message = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
+        expect(application.set_privileges).to eq([1, expected_message])
+      end
+
+    end
+
+  end
+
   describe "running the main loop" do
 
     let(:update_sender) { instance_double("AutomateLivenessAgent::LivenessUpdateSender") }
