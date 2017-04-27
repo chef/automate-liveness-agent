@@ -27,6 +27,10 @@ module AutomateLivenessAgent
 
       interval = (ENV["INTERVAL"] || UPDATE_INTERVAL_S).to_i
       loop do
+        if chef_uninstalled?
+          log("Chef Client appears to have been uninstalled, shutting down")
+          break false
+        end
         now = Time.now.to_i
         next_run = now + interval
         update
@@ -60,6 +64,11 @@ module AutomateLivenessAgent
 
     def update_payload
       base_payload.merge("@timestamp" => Time.now.utc.iso8601).to_json
+    end
+
+    def chef_uninstalled?
+      return false if config.install_check_file.nil?
+      !File.exist?(config.install_check_file)
     end
   end
 end
