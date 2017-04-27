@@ -35,6 +35,7 @@ module AutomateLivenessAgent
     attr_reader :trusted_certs_dir
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
+    attr_reader :install_check_file
 
     def self.load(config_path)
       c = new(config_path)
@@ -57,6 +58,7 @@ module AutomateLivenessAgent
       @trusted_certs_dir  = nil
       @unprivileged_uid   = nil
       @unprivileged_gid   = nil
+      @install_check_file = nil
     end
 
     def load
@@ -116,6 +118,8 @@ module AutomateLivenessAgent
       if config_data.key?("trusted_certs_dir") && !!config_data["trusted_certs_dir"]
         sanity_check_trusted_certs_dir(config_data["trusted_certs_dir"])
       end
+
+      @install_check_file = config_data["install_check_file"]
 
       self
     end
