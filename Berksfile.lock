@@ -1,0 +1,6 @@
+DEPENDENCIES
+  liveness-agent-test
+    path: test/cookbooks/liveness-agent-test
+
+GRAPH
+  liveness-agent-test (0.1.0)

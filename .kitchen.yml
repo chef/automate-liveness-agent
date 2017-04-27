@@ -1,0 +1,22 @@
+---
+driver:
+  name: vagrant
+  synced_folders:
+    - ["./build", "/home/vagrant/build"]
+
+provisioner:
+  name: chef_zero
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7.1
+  - name: ubuntu-12.04
+  - name: ubuntu-14.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[liveness-agent-test::default]
+    attributes:
