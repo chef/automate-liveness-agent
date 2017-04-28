@@ -37,6 +37,7 @@ module AutomateLivenessAgent
     attr_reader :argv
     attr_reader :config_path
     attr_reader :config
+    attr_reader :logger
 
     def self.run(argv)
       new(argv).run
@@ -46,6 +47,7 @@ module AutomateLivenessAgent
       @argv = argv
       @config_path = nil
       @config = Config.new(nil)
+      @logger = nil
     end
 
     def run
@@ -53,6 +55,7 @@ module AutomateLivenessAgent
         run(:handle_argv).
         run(:load_config).
         run(:set_privileges).
+        run(:setup_logger).
         run(:send_keepalives).
         finish
     end
@@ -93,8 +96,15 @@ module AutomateLivenessAgent
       [ 1,  msg ]
     end
 
+    def setup_logger
+      @logger = config.setup_logger
+      SUCCESS
+    rescue ConfigError => e
+      [ 1, e.to_s ]
+    end
+
     def send_keepalives
-      a = LivenessUpdateSender.new(config)
+      a = LivenessUpdateSender.new(config, logger)
       a.main_loop
       SUCCESS
     rescue ConfigError => e

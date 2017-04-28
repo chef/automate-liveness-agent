@@ -33,7 +33,7 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
   let(:config) { AutomateLivenessAgent::Config.new(config_path).load_data(config_data) }
 
-  let(:api_client) { described_class.new(config) }
+  let(:api_client) { described_class.new(config, Logger.new(nil)) }
 
   it "is created with a config object" do
     expect(api_client.config).to eq(config)

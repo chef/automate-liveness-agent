@@ -6,19 +6,21 @@ module AutomateLivenessAgent
   class LivenessUpdateSender
 
     attr_reader :config
+    attr_reader :logger
     attr_reader :api_client
 
     UPDATE_INTERVAL_S = 60 * 30
 
-    def initialize(config)
+    def initialize(config, logger)
       @config = config
+      @logger = logger
 
-      @api_client = APIClient.new(config)
+      @api_client = APIClient.new(config, logger)
       api_client.load_and_verify_config
     end
 
     def log(message)
-      print("#{message}\n")
+      logger.info(message)
     end
 
     def main_loop

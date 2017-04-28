@@ -36,13 +36,15 @@ module AutomateLivenessAgent
     HTTPS_SCHEME = "https".freeze
 
     attr_reader :config
+    attr_reader :logger
     attr_reader :uri
     attr_reader :base_request_params
     attr_reader :private_key
     attr_reader :http
 
-    def initialize(config)
+    def initialize(config, logger)
       @config = config
+      @logger = logger
     end
 
     def load_and_verify_config
@@ -88,13 +90,8 @@ module AutomateLivenessAgent
 
     private
 
-    # TODO: figure out logging requirements:
-    # * Are we logging to files and responsible for rotating them?
-    # * Can we _just_ log to a stream (like stdout)?
-    # * Do we need to deal with the stream closing and reopening and all that jazz?
-    # * in debug mode (ENV["DEBUG"]) are we sending output to that stream? (rn, $stderr is hardcoded)
     def log(message)
-      $stdout.print("#{message}\n")
+      logger.info(message)
     end
 
     def request_without_retries(body)
