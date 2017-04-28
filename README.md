@@ -76,6 +76,16 @@ done by setting `RUBYOPT` like so:
 RUBYOPT="--disable-gems"
 ```
 
+#### `RUBY_GC_HEAP_GROWTH_MAX_SLOTS`
+
+There are a lot of ways to tune the ruby GC, but setting
+`RUBY_GC_HEAP_GROWTH_MAX_SLOTS` is an easy way to prevent ruby from
+allocating too much extra memory we don't want it to have.
+
+```
+RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500
+```
+
 ## Development
 
 This project is developed as a typical ruby app with bundler and rspec.
