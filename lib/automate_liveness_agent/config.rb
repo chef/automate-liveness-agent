@@ -220,7 +220,7 @@ module AutomateLivenessAgent
 
     def validate_log_path(log_path)
       log_dir = File.dirname(log_path)
-      unless File.exist?(log_dir) && File.directory?(log_dir)
+      unless File.directory?(log_dir)
         raise ConfigError, "Log directory '#{log_dir}' (inferred from log_path config) does not exist or is not a directory"
       end
       unless File.writable?(log_dir)

@@ -213,7 +213,6 @@ RSpec.describe AutomateLivenessAgent::Config do
         let(:configured_log_file) { fixture("logger/logs") }
 
         it "fails with a config error" do
-          expect(File).to receive(:exist?).with(fixture("logger")).and_return(true)
           expect(File).to receive(:writable?).with(fixture("logger")).and_return(true)
           expect(File).to receive(:exist?).with(fixture("logger/logs")).and_return(true)
           expect(File).to receive(:writable?).with(fixture("logger/logs")).and_return(false)
