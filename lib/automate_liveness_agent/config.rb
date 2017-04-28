@@ -93,6 +93,9 @@ module AutomateLivenessAgent
       apply_config_values(config_data)
     end
 
+    # The logger should only be setup after privileges are dropped. Otherwise
+    # you can get into a situation where you've created the logfile as root,
+    # but no longer have root privileges and are not allowed to rotate the logfile
     def setup_logger
       @logger ||= Logger.new(validate_and_normalize_log_path(log_file), 1, logfile_max_size)
     end

@@ -96,6 +96,9 @@ module AutomateLivenessAgent
       [ 1,  msg ]
     end
 
+    # This intentionally comes after #set_privileges. Depending on config and
+    # system state, the logger may create logfiles; we must create the files as
+    # the lower privileged user or else we won't have permissions to rotate them.
     def setup_logger
       @logger = config.setup_logger
       SUCCESS
