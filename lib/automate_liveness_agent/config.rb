@@ -89,7 +89,7 @@ module AutomateLivenessAgent
     def apply_config_values(config_data)
       missing_settings = MANDATORY_CONFIG_SETTINGS - config_data.keys
       unless missing_settings.empty?
-        raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): '#{missing_settings.join("','")}'"
+        raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): \"#{missing_settings.join('","')}\""
       end
 
       # Mandatory config

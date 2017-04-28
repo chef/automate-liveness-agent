@@ -106,7 +106,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
           let(:config_data) { BASE_CONFIG_DATA.dup.tap { |d| d.delete(key) } }
 
-          let(:expected_message) { "Config file '#{config_path}' is missing mandatory setting(s): '#{key}'" }
+          let(:expected_message) { "Config file '#{config_path}' is missing mandatory setting(s): \"#{key}\"" }
 
           it "raises a ConfigError" do
             expect { config.apply_config_values(config_data) }.
@@ -121,7 +121,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
         let(:expected_message) do
           "Config file '#{config_path}' is missing mandatory setting(s): " <<
-            BASE_CONFIG_DATA.keys.map { |k| "'#{k}'" }.join(",")
+            BASE_CONFIG_DATA.keys.map { |k| "\"#{k}\"" }.join(',')
         end
 
         it "raises a ConfigError" do
