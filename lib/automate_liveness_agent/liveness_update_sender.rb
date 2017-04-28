@@ -51,7 +51,7 @@ module AutomateLivenessAgent
         "chef_server_fqdn" => config.chef_server_fqdn,
         "source" => "liveness_agent",
         "message_version" => "0.0.1",
-        "message_type" => "node_ping",
+        "event_type" => "node_ping",
         "organization_name" => config.org_name,
         "node_name" => config.client_name,
         "entity_uuid" => config.entity_uuid,

@@ -29,7 +29,7 @@ RSpec.describe AutomateLivenessAgent::LivenessUpdateSender do
           "chef_server_fqdn" => "chef.example",
           "source" => "liveness_agent",
           "message_version" => "0.0.1",
-          "message_type" => "node_ping",
+          "event_type" => "node_ping",
           "organization_name" => "default",
           "node_name" => "testnode.example.com",
           "entity_uuid" => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
