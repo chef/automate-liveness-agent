@@ -74,6 +74,7 @@ end
 
 module AutomateLivenessAgent
   module TestHelpers
+
     FIXTURES_DIR = File.expand_path("../fixtures/", __FILE__)
 
     def fixture(name)
@@ -170,5 +171,6 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 
   config.include AutomateLivenessAgent::TestHelpers
+  config.extend AutomateLivenessAgent::TestHelpers
 end
 

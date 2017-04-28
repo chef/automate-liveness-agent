@@ -26,7 +26,7 @@ RSpec.describe AutomateLivenessAgent::LivenessUpdateSender do
     allow(Time).to receive(:now).and_return(time)
   end
 
-  subject(:update_sender) { described_class.new(config) }
+  subject(:update_sender) { described_class.new(config, Logger.new(nil)) }
 
   describe "#update" do
     it "sends a valid payload" do

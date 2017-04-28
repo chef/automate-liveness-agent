@@ -1,5 +1,17 @@
 RSpec.describe AutomateLivenessAgent::Config do
 
+  BASE_CONFIG_DATA =
+    {
+    "chef_server_fqdn"   => "chef.example",
+    "client_key_path"    => fixture("config/example.pem"),
+    "client_name"        => "testnode.example.com",
+    "data_collector_url" => "https://chef.example/organizations/default/data-collector",
+    "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+    "org_name"           => "default",
+    "unprivileged_uid"   => 100,
+    "unprivileged_gid"   => 100,
+  }
+
   let(:config_path) { "/path/to/config.json" }
 
   subject(:config) { described_class.new(config_path) }
@@ -88,25 +100,13 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     describe "when the config file doesn't contain all required values" do
 
-      BASE_CONFIG_DATA =
-        {
-          "chef_server_fqdn"   => "chef.example",
-          "client_key_path"    => "/etc/chef/client.pem",
-          "client_name"        => "testnode.example.com",
-          "data_collector_url" => "https://chef.example/organizations/default/data-collector",
-          "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
-          "org_name"           => "default",
-          "unprivileged_uid"   => 100,
-          "unprivileged_gid"   => 100,
-        }
-
       BASE_CONFIG_DATA.each_key do |key|
 
         context "when key '#{key}' is not present" do
 
           let(:config_data) { BASE_CONFIG_DATA.dup.tap { |d| d.delete(key) } }
 
-          let(:expected_message) { "Config file '#{config_path}' is missing mandatory setting(s): '#{key}'" }
+          let(:expected_message) { "Config file '#{config_path}' is missing mandatory setting(s): \"#{key}\"" }
 
           it "raises a ConfigError" do
             expect { config.apply_config_values(config_data) }.
@@ -121,7 +121,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
         let(:expected_message) do
           "Config file '#{config_path}' is missing mandatory setting(s): " <<
-            BASE_CONFIG_DATA.keys.map { |k| "'#{k}'" }.join(",")
+            BASE_CONFIG_DATA.keys.map { |k| "\"#{k}\"" }.join(',')
         end
 
         it "raises a ConfigError" do
@@ -132,6 +132,134 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     end
 
+  end
+
+  describe "configuring the logger" do
+
+    let(:logger) { config.setup_logger }
+
+    let(:log_dev) { logger.instance_variable_get(:@logdev) }
+
+    let(:log_io) { log_dev.dev }
+
+    let(:configured_log_file) { nil }
+
+    let(:config_data) do
+      BASE_CONFIG_DATA.merge("log_file" => configured_log_file)
+    end
+
+    before do
+      config.load_data(config_data)
+    end
+
+    context "when not set or set to nil" do
+
+      it "logs to stdout" do
+        expect(logger).to be_a_kind_of(Logger)
+        expect(log_io).to eq(STDOUT)
+      end
+
+    end
+
+    context "when set to STDOUT" do
+
+      let(:configured_log_file) { "STDOUT" }
+
+      it "logs to stdout" do
+        expect(logger).to be_a_kind_of(Logger)
+        expect(log_io).to eq(STDOUT)
+      end
+
+    end
+
+    context "when set to STDERR" do
+
+      let(:configured_log_file) { "STDERR" }
+
+      it "logs to stderr" do
+        expect(logger).to be_a_kind_of(Logger)
+        expect(log_io).to eq(STDERR)
+      end
+
+    end
+
+    context "when set to a file" do
+
+      context "when the file's directory doesn't exist" do
+
+        let(:configured_log_file) { fixture("no_such_path/exists/log") }
+
+        it "fails with a config error" do
+          message = "Log directory '#{fixture("no_such_path/exists")}' (inferred from log_path config) does not exist or is not a directory"
+          expect { config.setup_logger }.to raise_error(AutomateLivenessAgent::ConfigError, message)
+        end
+
+      end
+
+      context "when the file's directory isn't writable" do
+
+        let(:configured_log_file) { fixture("logger/logs") }
+
+        it "fails with a config error" do
+          expect(File).to receive(:writable?).with(fixture("logger")).and_return(false)
+          message = "Log directory '#{fixture("logger")}' (inferred from log_path config) is not writable by current user (uid: #{Process.uid})"
+          expect { config.setup_logger }.to raise_error(AutomateLivenessAgent::ConfigError, message)
+        end
+
+      end
+
+      context "when the log file itself exists and isn't writable" do
+
+        let(:configured_log_file) { fixture("logger/logs") }
+
+        it "fails with a config error" do
+          expect(File).to receive(:writable?).with(fixture("logger")).and_return(true)
+          expect(File).to receive(:exist?).with(fixture("logger/logs")).and_return(true)
+          expect(File).to receive(:writable?).with(fixture("logger/logs")).and_return(false)
+          message = "Log file '#{fixture("logger/logs")}' (set by log_path config) is not writable by current user (uid: #{Process.uid})"
+          expect { config.setup_logger }.to raise_error(AutomateLivenessAgent::ConfigError, message)
+        end
+
+      end
+
+      context "when the file permissions are all ok" do
+
+        def nuke_files
+          Dir[fixture("logger/*")].each { |f| File.unlink(f) }
+        end
+
+        let(:configured_log_file) { fixture("logger/logs") }
+
+        let(:max_size) { log_dev.instance_variable_get(:@shift_size) }
+
+        before { nuke_files }
+        after { nuke_files }
+
+        context "without stress mode" do
+
+          it "opens the log and configures a max size of 512k and 2 files to rotate" do
+            expect(log_io.path).to eq(configured_log_file)
+            expect(max_size).to eq(512 * 1024)
+          end
+
+        end
+
+        context "when stress mode is enabled" do
+
+          around do |e|
+            ENV["LOGGER_STRESS_MODE"] = "1"
+            e.run
+            ENV.delete("LOGGER_STRESS_MODE")
+          end
+
+          it "configures a max size of 2k" do
+            expect(log_io.path).to eq(configured_log_file)
+            expect(max_size).to eq(2 * 1024)
+          end
+
+        end
+      end
+    end
   end
 
   context "after the config file is loaded" do

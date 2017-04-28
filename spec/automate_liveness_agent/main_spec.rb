@@ -149,11 +149,13 @@ RSpec.describe AutomateLivenessAgent::Main do
 
     let(:update_sender) { instance_double("AutomateLivenessAgent::LivenessUpdateSender") }
 
+    before { application.setup_logger }
+
     context "with a valid configuration" do
 
       it "runs the update sender's main loop" do
         expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config).
+          with(application.config, application.logger).
           and_return(update_sender)
         expect(update_sender).to receive(:main_loop)
         expect(application.send_keepalives).to eq(described_class::SUCCESS)
@@ -165,7 +167,7 @@ RSpec.describe AutomateLivenessAgent::Main do
 
       it "exits 1 with the error message" do
         expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config).
+          with(application.config, application.logger).
           and_return(update_sender)
         expect(update_sender).to receive(:main_loop).
           and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
