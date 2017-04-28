@@ -1,4 +1,5 @@
 require "json"
+require "logger"
 
 module AutomateLivenessAgent
   class ConfigError < StandardError
@@ -8,6 +9,14 @@ module AutomateLivenessAgent
 
     DEFAULT_CONFIG_PATH = "/etc/chef/config.json".freeze
     DEFAULT_VERIFY_MODE = "verify_peer".freeze
+
+    STDOUT_STRING = "STDOUT".freeze
+    STDERR_STRING = "STDERR".freeze
+
+    SIZE_512K = 1024 * 512
+    SIZE_2K   = 1024 * 2
+
+    LOGGER_STRESS_MODE = "LOGGER_STRESS_MODE".freeze
 
     MANDATORY_CONFIG_SETTINGS = %w{
       chef_server_fqdn
@@ -36,6 +45,7 @@ module AutomateLivenessAgent
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
     attr_reader :install_check_file
+    attr_reader :log_file
 
     def self.load(config_path)
       c = new(config_path)
@@ -44,7 +54,11 @@ module AutomateLivenessAgent
     end
 
     def initialize(config_path)
-      @config_path        = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
+      # Internal variables (doesn't map to config)
+      @config_path  = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
+      @logger       = nil
+
+      # Variables that map to config settings
       @chef_server_fqdn   = nil
       @client_key         = nil
       @client_key_path    = nil
@@ -59,6 +73,7 @@ module AutomateLivenessAgent
       @unprivileged_uid   = nil
       @unprivileged_gid   = nil
       @install_check_file = nil
+      @log_file           = nil
     end
 
     def load
@@ -76,6 +91,10 @@ module AutomateLivenessAgent
       sanity_check_config_path
       config_data = parse_config_file
       apply_config_values(config_data)
+    end
+
+    def setup_logger
+      @logger ||= Logger.new(validate_and_normalize_log_path(log_file), 1, logfile_max_size)
     end
 
     def load_client_key
@@ -120,6 +139,7 @@ module AutomateLivenessAgent
       end
 
       @install_check_file = config_data["install_check_file"]
+      @log_file           = config_data["log_file"]
 
       self
     end
@@ -182,5 +202,41 @@ module AutomateLivenessAgent
         raise ConfigError, "Config file '#{config_path}' is empty"
       end
     end
+
+    def validate_and_normalize_log_path(log_path)
+      case log_path
+      when STDOUT_STRING, nil
+        STDOUT
+      when STDERR_STRING
+        STDERR
+      else
+        validate_log_path(log_path)
+        log_path
+      end
+    end
+
+    def validate_log_path(log_path)
+      log_dir = File.dirname(log_path)
+      unless File.exist?(log_dir) && File.directory?(log_dir)
+        raise ConfigError, "Log directory '#{log_dir}' (inferred from log_path config) does not exist or is not a directory"
+      end
+      unless File.writable?(log_dir)
+        raise ConfigError, "Log directory '#{log_dir}' (inferred from log_path config) is not writable by current user (uid: #{Process.uid})"
+      end
+      if File.exist?(log_path) && !File.writable?(log_path)
+        raise ConfigError, "Log file '#{log_file}' (set by log_path config) is not writable by current user (uid: #{Process.uid})"
+      end
+      log_path
+    end
+
+    def logfile_max_size
+      if ENV[LOGGER_STRESS_MODE]
+        SIZE_2K
+      else
+        SIZE_512K
+      end
+
+    end
+
   end
 end
