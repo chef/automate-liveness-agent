@@ -10,3 +10,4 @@
 /spec/examples.txt
 /config.json
 /build/*
+*/.kitchen/*

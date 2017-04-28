@@ -34,3 +34,14 @@ THAT
   end.compile_as("build/automate-liveness-agent")
 
 end
+
+desc "Compile the application into a recipe"
+task compile_recipe: [:compile] do
+  compiled_agent = File.read(File.expand_path("./build/automate-liveness-agent"))
+  recipe = File.read(File.expand_path("./lib/recipe.rb"))
+  recipe.gsub!("#LIVENESS_AGENT", compiled_agent)
+  compiled_recipe = File.expand_path("./build/automate-liveness-recipe.rb")
+  File.open(compiled_recipe, "w+") { |f| f.write(recipe) }
+  File.chmod(0755, compiled_recipe)
+  FileUtils.cp(compiled_recipe, "./test/cookbooks/liveness-agent-test/recipes/compiled-recipe.rb")
+end

@@ -1,0 +1,24 @@
+---
+driver:
+  name: vagrant
+  network:
+    # The 'http' inspec resource current executes from the host machine so we'll
+    # have to forward the port to the guest.
+    - ["forwarded_port", {guest: 9292, host: 9292}]
+
+provisioner:
+  name: chef_zero
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7.1
+  - name: ubuntu-12.04
+  - name: ubuntu-14.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[liveness-agent-test::default]
+    attributes:
