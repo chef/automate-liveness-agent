@@ -45,7 +45,7 @@ module AutomateLivenessAgent
     def initialize(argv)
       @argv = argv
       @config_path = nil
-      @config = nil
+      @config = Config.new(nil)
     end
 
     def run
@@ -81,7 +81,16 @@ module AutomateLivenessAgent
     end
 
     def set_privileges
+      unless config.unprivileged_gid.nil?
+        Process.gid = config.unprivileged_gid
+      end
+      unless config.unprivileged_uid.nil?
+        Process.uid = config.unprivileged_uid
+      end
       SUCCESS
+    rescue Errno::EPERM
+      msg = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
+      [ 1,  msg ]
     end
 
     def send_keepalives
