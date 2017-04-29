@@ -102,6 +102,19 @@ To run tests:
 bundle exec rspec
 ```
 
+To test the compiled recipe on a target platform:
+
+```
+rake compile_recipe
+kitchen test $target-platform
+```
+
+To see supported platforms:
+
+```
+kitchen list
+```
+
 ## Contributing
 
 Bug reports should be filed with your support representitive.
