@@ -34,6 +34,8 @@ module AutomateLivenessAgent
 
     SUCCESS = [ 0, "".freeze ].freeze
 
+    PIDFILE_LOCATION = "/var/run/automate-liveness-agent.pid".freeze
+
     attr_reader :argv
     attr_reader :config_path
     attr_reader :config
@@ -111,6 +113,8 @@ module AutomateLivenessAgent
       if config.scheduled_task_mode
         a.update
       else
+        Process.daemon
+        File.open(PIDFILE_LOCATION, "w") { |f| f.write(Process.pid) }
         a.main_loop
       end
       SUCCESS

@@ -15,18 +15,27 @@
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
-
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-# TODO: Everything here assumes Ubuntu.
+windows = node['platform_family'] == 'windows'
 
-agent_dir     = '/var/opt/chef/'
-agent_bin_dir = ::File.join(agent_dir, 'bin')
-agent_etc_dir = ::File.join(agent_dir, 'etc')
-agent_log_dir = '/var/log/chef'
-agent_bin     = ::File.join(agent_bin_dir, 'automate-liveness-agent')
-agent_conf    = ::File.join(agent_etc_dir, 'config.json')
-server_uri    = URI(Chef::Config[:chef_server_url])
+agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
+agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
+agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
+agent_log_dir  = Chef::Config.platform_specific_path('/var/log/chef')
+agent_bin      = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
+agent_conf     = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
+agent_username = 'chefautomate'
+server_uri     = URI(Chef::Config[:chef_server_url])
+
+init_script_path = value_for_platform(
+  %i(debian ubuntu centos) => { default: '/etc/init.d/automate-liveness-agent' }
+)
+
+agent_user = user agent_username do
+  home agent_dir
+  shell '/bin/nologin' unless windows
+end
 
 [agent_bin_dir, agent_etc_dir, agent_log_dir].each do |dir|
   directory dir do
@@ -37,14 +46,12 @@ end
 file agent_bin do
   mode 0755
   owner 'root'
-  group 'root'
   content liveness_agent
 end
 
 file agent_conf do
   mode 0755
   owner 'root'
-  group 'root'
   content(
     lazy do
       {
@@ -55,8 +62,8 @@ file agent_conf do
         'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file' => Gem.ruby,
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => nil,
-        'unprivileged_gid'   => nil,
+        'unprivileged_uid'   => agent_user.uid,
+        'unprivileged_gid'   => agent_user.gid,
       }.to_json
     end
   )
@@ -86,7 +93,7 @@ start() {
   fi
   echo 'Starting service…' >&2
   local CMD="$SCRIPT &> \"$LOGFILE\" & echo \$!"
-  su -c "$CMD" $RUNAS > "$PIDFILE"
+  su -c "$CMD" $RUNAS
   echo 'Service started' >&2
 }
 
@@ -96,7 +103,8 @@ stop() {
     return 1
   fi
   echo 'Stopping service…' >&2
-  kill -15 $(cat "$PIDFILE") && rm -f "$PIDFILE"
+  kill -15 $(cat "$PIDFILE")
+  rm -f "$PIDFILE"
   echo 'Service stopped' >&2
 }
 
@@ -132,17 +140,20 @@ case "$1" in
 esac
 INIT_SCRIPT
 
-init_script_path = value_for_platform_family(
-  'debian' => '/etc/init.d/automate-liveness-agent'
-)
-
 file init_script_path do
   content(init_script)
   mode 0755
   owner 'root'
-  group 'root'
 end
 
 service 'automate-liveness-agent' do
+  supports(
+    start: true,
+    stop: true,
+    restart: true,
+    uninstall: true,
+    status: false,
+    reload: false
+  )
   action [:enable, :start]
 end
