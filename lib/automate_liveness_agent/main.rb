@@ -107,7 +107,13 @@ module AutomateLivenessAgent
     end
 
     def send_keepalives
+      # do not daemonize before this. The reason is that
+      # LivenessUpdateSender#initialize calls APIClient#load_and_verify_config,
+      # which can raise ConfigError, which we then want to print to stderr but
+      # daemonizing will close stdout/stderr.
       a = LivenessUpdateSender.new(config, logger)
+      # now you can daemonize--should not get any exceptions after here.
+      # `Process.daemon()` should do everything you need.
       a.main_loop
       SUCCESS
     rescue ConfigError => e
