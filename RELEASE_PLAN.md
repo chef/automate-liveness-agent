@@ -57,6 +57,35 @@ a bit, but definitely should not exceed 20MB.
 
 ## Ship It!
 
-* Set the version
-* Tag it
-* Make a [github release](https://github.com/chef/automate-liveness-agent/releases)
+#### Tag It
+
+We're using annotated tags in the `v0.1.0` format:
+
+```
+git tag -a v$VERSION
+git push origin --tags
+```
+
+#### Build the Recipe
+
+```
+bundle exec rake compile_recipe
+```
+
+#### Github Release
+
+Go to the [github releases](https://github.com/chef/automate-liveness-agent/releases)
+page. Click the "Draft a New Release" button on the right.
+
+Enter the name of the tag you just created and fill out the title and
+description.
+
+Upload the compiled recipe (from `build/automate-liveness-recipe.rb`) to
+the release.
+
+Click "Publish release"
+
+#### Update the Version Number for Dev
+
+Set the version in `lib/automate_liveness_agent/version.rb`
+
