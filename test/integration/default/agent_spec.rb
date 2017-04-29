@@ -12,7 +12,7 @@ describe command("INTERVAL=2 chef-client -z -c /tmp/kitchen/test-client.rb -j /t
 end
 
 # sleep to let the liveness agent send some pings
-describe command("sleep 5") do
+describe command("sleep 10") do
   its("exit_status") { should eq(0) }
 end
 

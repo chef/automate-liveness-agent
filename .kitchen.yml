@@ -4,6 +4,8 @@ driver:
   network:
     # The 'http' inspec resource current executes from the host machine so we'll
     # have to forward the port to the guest.
+    # TODO: make the port an attribute in the test cookbook so we can enable some
+    # concurrency.
     - ["forwarded_port", {guest: 9292, host: 9292}]
 
 provisioner:
@@ -13,9 +15,55 @@ verifier:
   name: inspec
 
 platforms:
-  - name: centos-7.1
+  # Commented platforms are platforms that aren't supported yet.
+  #
+  # freely available bento boxes
+  #
+  - name: debian-7.11
+  - name: debian-8.7
   - name: ubuntu-12.04
   - name: ubuntu-14.04
+  - name: ubuntu-16.04
+  - name: ubuntu-16.11
+  #- name: centos-5.11
+  #- name: centos-6.8
+  #- name: centos-7.11
+  #- name: fedora-7.25
+  #- name: oracle-5.11
+  #- name: oracle-6.8
+  #- name: oracle-7.3
+  #- name: freebsd-10.3
+  #- name: freebsd-11.0
+  #- name: opensuse-leap-42.2
+  #
+  # maybe working windows boxes
+  #
+  #- name: windows-2012r2
+  #  driver:
+  #    box: mwrock/Windows2012R2
+  #- name: windows-2016
+  #  driver:
+  #    box: mwrock/Windows2016
+  #- name: windows-nano
+  #  driver:
+  #    box: mwrock/WindowsNano
+  #- name: windows-8.1
+  #  driver:
+  #    box: mwrock/windows8.1-amd64
+  #
+  # proprietary boxes that must be built locally
+  #
+  #- name: rhel-5.11
+  #- name: rhel-6.8
+  #- name: rhel-7.11
+  #- name: sles-12
+  #- name: sles-12-sp1
+  #- name: sles-12-sp2
+  #- name: macosx-10.9
+  #- name: macosx-10.10
+  #- name: macosx-10.11
+  #- name: solaris-10.11
+  #- name: solaris-11
 
 suites:
   - name: default

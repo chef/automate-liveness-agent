@@ -244,12 +244,18 @@ module AutomateLivenessAgent
 end
 ## lib/automate_liveness_agent/config.rb ##
 require "json"
+require "logger"
 module AutomateLivenessAgent
   class ConfigError < StandardError
   end
   class Config
     DEFAULT_CONFIG_PATH = "/etc/chef/config.json".freeze
     DEFAULT_VERIFY_MODE = "verify_peer".freeze
+    STDOUT_STRING = "STDOUT".freeze
+    STDERR_STRING = "STDERR".freeze
+    SIZE_512K = 1024 * 512
+    SIZE_2K   = 1024 * 2
+    LOGGER_STRESS_MODE = "LOGGER_STRESS_MODE".freeze
     MANDATORY_CONFIG_SETTINGS = %w{
       chef_server_fqdn
       client_key_path
@@ -276,13 +282,15 @@ module AutomateLivenessAgent
     attr_reader :unprivileged_uid
     attr_reader :unprivileged_gid
     attr_reader :install_check_file
+    attr_reader :log_file
     def self.load(config_path)
       c = new(config_path)
       c.load
       c
     end
     def initialize(config_path)
-      @config_path        = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
+      @config_path  = File.expand_path(config_path || DEFAULT_CONFIG_PATH, Dir.pwd)
+      @logger       = nil
       @chef_server_fqdn   = nil
       @client_key         = nil
       @client_key_path    = nil
@@ -297,6 +305,7 @@ module AutomateLivenessAgent
       @unprivileged_uid   = nil
       @unprivileged_gid   = nil
       @install_check_file = nil
+      @log_file           = nil
     end
     def load
       load_config_file
@@ -312,6 +321,9 @@ module AutomateLivenessAgent
       config_data = parse_config_file
       apply_config_values(config_data)
     end
+    def setup_logger
+      @logger ||= Logger.new(validate_and_normalize_log_path(log_file), 1, logfile_max_size)
+    end
     def load_client_key
       if !(File.exist?(client_key_path) && File.readable?(client_key_path))
         raise ConfigError,
@@ -322,7 +334,7 @@ module AutomateLivenessAgent
     def apply_config_values(config_data)
       missing_settings = MANDATORY_CONFIG_SETTINGS - config_data.keys
       unless missing_settings.empty?
-        raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): '#{missing_settings.join("','")}'"
+        raise ConfigError, "Config file '#{config_path}' is missing mandatory setting(s): \"#{missing_settings.join('","')}\""
       end
       @chef_server_fqdn   = config_data["chef_server_fqdn"]
       @client_key_path    = config_data["client_key_path"]
@@ -345,6 +357,7 @@ module AutomateLivenessAgent
         sanity_check_trusted_certs_dir(config_data["trusted_certs_dir"])
       end
       @install_check_file = config_data["install_check_file"]
+      @log_file           = config_data["log_file"]
       self
     end
     private
@@ -396,6 +409,37 @@ module AutomateLivenessAgent
         raise ConfigError, "Config file '#{config_path}' is empty"
       end
     end
+    def validate_and_normalize_log_path(log_path)
+      case log_path
+      when STDOUT_STRING, nil
+        STDOUT
+      when STDERR_STRING
+        STDERR
+      else
+        validate_log_path(log_path)
+        log_path
+      end
+    end
+    def validate_log_path(log_path)
+      log_dir = File.dirname(log_path)
+      unless File.directory?(log_dir)
+        raise ConfigError, "Log directory '#{log_dir}' (inferred from log_path config) does not exist or is not a directory"
+      end
+      unless File.writable?(log_dir)
+        raise ConfigError, "Log directory '#{log_dir}' (inferred from log_path config) is not writable by current user (uid: #{Process.uid})"
+      end
+      if File.exist?(log_path) && !File.writable?(log_path)
+        raise ConfigError, "Log file '#{log_file}' (set by log_path config) is not writable by current user (uid: #{Process.uid})"
+      end
+      log_path
+    end
+    def logfile_max_size
+      if ENV[LOGGER_STRESS_MODE]
+        SIZE_2K
+      else
+        SIZE_512K
+      end
+    end
   end
 end
 ## lib/automate_liveness_agent/api_client.rb ##
@@ -420,12 +464,14 @@ module AutomateLivenessAgent
     SUCCESS = "Success".freeze
     HTTPS_SCHEME = "https".freeze
     attr_reader :config
+    attr_reader :logger
     attr_reader :uri
     attr_reader :base_request_params
     attr_reader :private_key
     attr_reader :http
-    def initialize(config)
+    def initialize(config, logger)
       @config = config
+      @logger = logger
     end
     def load_and_verify_config
       parse_key
@@ -466,7 +512,7 @@ module AutomateLivenessAgent
     end
     private
     def log(message)
-      $stdout.print("#{message}\n")
+      logger.info(message)
     end
     def request_without_retries(body)
       req = setup_request(body)
@@ -568,15 +614,17 @@ require "time"
 module AutomateLivenessAgent
   class LivenessUpdateSender
     attr_reader :config
+    attr_reader :logger
     attr_reader :api_client
     UPDATE_INTERVAL_S = 60 * 30
-    def initialize(config)
+    def initialize(config, logger)
       @config = config
-      @api_client = APIClient.new(config)
+      @logger = logger
+      @api_client = APIClient.new(config, logger)
       api_client.load_and_verify_config
     end
     def log(message)
-      print("#{message}\n")
+      logger.info(message)
     end
     def main_loop
       obj_counts = {}
@@ -651,6 +699,7 @@ module AutomateLivenessAgent
     attr_reader :argv
     attr_reader :config_path
     attr_reader :config
+    attr_reader :logger
     def self.run(argv)
       new(argv).run
     end
@@ -658,12 +707,14 @@ module AutomateLivenessAgent
       @argv = argv
       @config_path = nil
       @config = Config.new(nil)
+      @logger = nil
     end
     def run
       Pipeline.new(self).
         run(:handle_argv).
         run(:load_config).
         run(:set_privileges).
+        run(:setup_logger).
         run(:send_keepalives).
         finish
     end
@@ -700,8 +751,14 @@ module AutomateLivenessAgent
       msg = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
       [ 1,  msg ]
     end
+    def setup_logger
+      @logger = config.setup_logger
+      SUCCESS
+    rescue ConfigError => e
+      [ 1, e.to_s ]
+    end
     def send_keepalives
-      a = LivenessUpdateSender.new(config)
+      a = LivenessUpdateSender.new(config, logger)
       a.main_loop
       SUCCESS
     rescue ConfigError => e
@@ -714,18 +771,27 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 AutomateLivenessAgent::Main.run(ARGV) unless ENV["AUTOMATE_LIVENESS_AGENT_SPECS_MODE"]
 
 AUTOMATE_LIVENESS_AGENT
-
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-# TODO: Everything here assumes Ubuntu.
+windows = node['platform_family'] == "windows"
 
-agent_dir     = '/var/opt/chef/'
-agent_bin_dir = ::File.join(agent_dir, 'bin')
-agent_etc_dir = ::File.join(agent_dir, 'etc')
-agent_log_dir = '/var/log/chef'
-agent_bin     = ::File.join(agent_bin_dir, 'automate-liveness-agent')
-agent_conf    = ::File.join(agent_etc_dir, 'config.json')
-server_uri    = URI(Chef::Config[:chef_server_url])
+agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
+agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
+agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
+agent_log_dir  = Chef::Config.platform_specific_path('/var/log/chef')
+agent_bin      = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
+agent_conf     = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
+agent_username = 'chefautomate'
+server_uri     = URI(Chef::Config[:chef_server_url])
+
+init_script_path = value_for_platform(
+  %i(debian ubuntu) => { default: '/etc/init.d/automate-liveness-agent' }
+)
+
+agent_user = user agent_username do
+  home agent_dir
+  shell '/bin/nologin' unless windows
+end
 
 [agent_bin_dir, agent_etc_dir, agent_log_dir].each do |dir|
   directory dir do
@@ -736,14 +802,12 @@ end
 file agent_bin do
   mode 0755
   owner 'root'
-  group 'root'
   content liveness_agent
 end
 
 file agent_conf do
   mode 0755
   owner 'root'
-  group 'root'
   content(
     lazy do
       {
@@ -754,8 +818,8 @@ file agent_conf do
         'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file' => Gem.ruby,
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => nil,
-        'unprivileged_gid'   => nil,
+        'unprivileged_uid'   => agent_user.uid,
+        'unprivileged_gid'   => agent_user.gid,
       }.to_json
     end
   )
@@ -831,15 +895,10 @@ case "$1" in
 esac
 INIT_SCRIPT
 
-init_script_path = value_for_platform_family(
-  'debian' => '/etc/init.d/automate-liveness-agent'
-)
-
 file init_script_path do
   content(init_script)
   mode 0755
   owner 'root'
-  group 'root'
 end
 
 service 'automate-liveness-agent' do
