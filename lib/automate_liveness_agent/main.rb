@@ -108,7 +108,11 @@ module AutomateLivenessAgent
 
     def send_keepalives
       a = LivenessUpdateSender.new(config, logger)
-      a.main_loop
+      if config.scheduled_task_mode
+        a.update
+      else
+        a.main_loop
+      end
       SUCCESS
     rescue ConfigError => e
       [ 1, e.to_s ]

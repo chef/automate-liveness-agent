@@ -6,5 +6,6 @@
   "org_name": "default",
   "entity_uuid": "d4a509ca-bc15-422d-8a17-1f3903856bc4",
   "unprivileged_uid": 100,
-  "unprivileged_gid": 200
+  "unprivileged_gid": 200,
+  "scheduled_task_mode": true
 }

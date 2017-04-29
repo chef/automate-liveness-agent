@@ -20,6 +20,10 @@ RSpec.describe AutomateLivenessAgent::Config do
     expect(config.config_path).to eq(config_path)
   end
 
+  it "disables scheduled task mode by default" do
+    expect(config.scheduled_task_mode).to be(false)
+  end
+
   context "when created with a nil config path" do
 
     let(:config_path) { nil }
@@ -296,6 +300,10 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     it "has a GID to drop privileges to" do
       expect(config.unprivileged_gid).to eq(200)
+    end
+
+    it "has a scheduled task mode setting" do
+      expect(config.scheduled_task_mode).to be(true)
     end
 
   end
