@@ -15,7 +15,7 @@ TEST_BUILD_ARTIFACT=1 bundle exec rake
 Run the full kitchen acceptance suite
 
 ```
-TBD
+rake compile_recipe && kitchen test
 ```
 
 #### Memory and Log Rotation Testing
