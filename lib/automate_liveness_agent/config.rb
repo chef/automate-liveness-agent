@@ -46,6 +46,7 @@ module AutomateLivenessAgent
     attr_reader :unprivileged_gid
     attr_reader :install_check_file
     attr_reader :log_file
+    attr_reader :scheduled_task_mode
 
     def self.load(config_path)
       c = new(config_path)
@@ -59,21 +60,22 @@ module AutomateLivenessAgent
       @logger       = nil
 
       # Variables that map to config settings
-      @chef_server_fqdn   = nil
-      @client_key         = nil
-      @client_key_path    = nil
-      @client_name        = nil
-      @data_collector_url = nil
-      @entity_uuid        = nil
-      @org_name           = nil
-      @ssl_verify_mode    = DEFAULT_VERIFY_MODE
-      @ssl_ca_file        = nil
-      @ssl_ca_path        = nil
-      @trusted_certs_dir  = nil
-      @unprivileged_uid   = nil
-      @unprivileged_gid   = nil
-      @install_check_file = nil
-      @log_file           = nil
+      @chef_server_fqdn     = nil
+      @client_key           = nil
+      @client_key_path      = nil
+      @client_name          = nil
+      @data_collector_url   = nil
+      @entity_uuid          = nil
+      @org_name             = nil
+      @ssl_verify_mode      = DEFAULT_VERIFY_MODE
+      @ssl_ca_file          = nil
+      @ssl_ca_path          = nil
+      @trusted_certs_dir    = nil
+      @unprivileged_uid     = nil
+      @unprivileged_gid     = nil
+      @install_check_file   = nil
+      @log_file             = nil
+      @scheduled_task_mode  = false
     end
 
     def load
@@ -141,8 +143,9 @@ module AutomateLivenessAgent
         sanity_check_trusted_certs_dir(config_data["trusted_certs_dir"])
       end
 
-      @install_check_file = config_data["install_check_file"]
-      @log_file           = config_data["log_file"]
+      @install_check_file   = config_data["install_check_file"]
+      @log_file             = config_data["log_file"]
+      @scheduled_task_mode  = config_data["scheduled_task_mode"]
 
       self
     end

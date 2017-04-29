@@ -177,6 +177,36 @@ RSpec.describe AutomateLivenessAgent::Main do
 
     end
 
+    context "in scheduled task mode" do
+
+      let(:config_data) do
+        {
+          "chef_server_fqdn" => "",
+          "client_key_path" => fixture("config/example.pem"),
+          "client_name" => "",
+          "data_collector_url" => "",
+          "entity_uuid" => "",
+          "org_name" => "",
+          "unprivileged_uid" => nil,
+          "unprivileged_gid" => nil,
+          "scheduled_task_mode" => true,
+        }
+      end
+
+      before do
+        application.config.load_data(config_data)
+      end
+
+      it "tells LivenessUpdateSender to make a single update instead of looping" do
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
+          with(application.config, application.logger).
+          and_return(update_sender)
+        expect(update_sender).to receive(:update)
+        expect(application.send_keepalives).to eq(described_class::SUCCESS)
+      end
+
+    end
+
   end
 
 end
