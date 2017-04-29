@@ -89,3 +89,5 @@ Click "Publish release"
 
 Set the version in `lib/automate_liveness_agent/version.rb`
 
+Commit and push the version number update.
+
