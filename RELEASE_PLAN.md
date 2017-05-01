@@ -25,18 +25,29 @@ rake compile_recipe && kitchen test
 Run this recipe at least 2x so we know it works continuously
 
 ```
-kitchen converge PLATFORM
-kitchen converge PLATFORM
+kitchen test PLATFORM -d never
+kitchen login PLATFORM
+sudo -i
+INTERVAL=2 chef-client -z -c /tmp/kitchen/test-client.rb -j /tmp/kitchen/test-attrs.json
 ```
 
 ##### Init Script Acceptance Test
 
-Test all the functions of the init script:
+Test all the functions of the init script. Check the output of `ps` to
+verify.
 
-* start is run in kitchen
-* stop
-* restart
+* start, when stopped, starts it
+* start, when started, does not start another one
+* stop, when started, stops it
+* stop, when stopped, says service not running
+* restart, when stopped, starts it
+* restart, when running, stops the running one and starts a new one
 * uninstall
+
+##### Logging Test
+
+Ensure the agent is correctly logging. The logfile should be owned by
+the non-root user we create for the agent.
 
 ##### Chef Client Uninstall Detection
 
