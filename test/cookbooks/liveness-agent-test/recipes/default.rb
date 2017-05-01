@@ -4,6 +4,3 @@
 # Chef Automate service chef-zero to run our compiled recipe artifact.
 
 node.override['liveness-agent-test']['kitchen_root'] = platform_family?('windows') ? :: File.join(ENV['TEMP'], 'kitchen') : '/tmp/kitchen'
-
-include_recipe 'liveness-agent-test::test-client'
-include_recipe 'liveness-agent-test::faux-automate'

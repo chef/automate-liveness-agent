@@ -1,0 +1,8 @@
+name: default
+title: InSpec Profile
+maintainer: Ryan Cragun
+copyright: Chef Software, Inc.
+copyright_email: me@ryan.ec
+license: All Rights Reserved
+summary: An InSpec Compliance Profile
+version: 0.1.0
