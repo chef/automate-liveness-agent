@@ -123,8 +123,8 @@ RSpec.describe AutomateLivenessAgent::Main do
       let(:gid) { nil }
 
       it "does not change uid or gid" do
-        expect(Process).to_not receive(:uid=)
-        expect(Process).to_not receive(:gid=)
+        expect(Process::Sys).to_not receive(:setuid)
+        expect(Process::Sys).to_not receive(:setgid)
         application.set_privileges
       end
 
@@ -136,15 +136,15 @@ RSpec.describe AutomateLivenessAgent::Main do
       let(:gid) { 200 }
 
       it "sets uid and gid" do
-        expect(Process).to receive(:uid=).with(100)
-        expect(Process).to receive(:gid=).with(200)
+        expect(Process::Sys).to receive(:setuid).with(100)
+        expect(Process::Sys).to receive(:setgid).with(200)
         expect(File).to receive(:open).with("/var/run/automate-liveness-agent.pid", "w", 0644)
         application.set_privileges
       end
 
       it "resues permissions errors and returns an error message" do
         expect(File).to receive(:open).with("/var/run/automate-liveness-agent.pid", "w", 0644)
-        expect(Process).to receive(:gid=).with(200).and_raise(Errno::EPERM, "not allowed")
+        expect(Process::Sys).to receive(:setgid).with(200).and_raise(Errno::EPERM, "not allowed")
         expected_message = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
         expect(application.set_privileges).to eq([1, expected_message])
       end

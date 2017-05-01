@@ -93,10 +93,10 @@ module AutomateLivenessAgent
         @pidfile_handle = File.open(PIDFILE_LOCATION, WRITE_MODE, 0644)
       end
       unless config.unprivileged_gid.nil?
-        Process.gid = config.unprivileged_gid
+        Process::Sys.setgid(config.unprivileged_gid)
       end
       unless config.unprivileged_uid.nil?
-        Process.uid = config.unprivileged_uid
+        Process::Sys.setuid(config.unprivileged_uid)
       end
       SUCCESS
     rescue Errno::EACCES
