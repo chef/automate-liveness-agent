@@ -136,6 +136,7 @@ RSpec.describe AutomateLivenessAgent::Main do
       end
 
       it "resues permissions errors and returns an error message" do
+        expect(File).to receive(:open).with("/var/run/automate-liveness-agent.pid", "w", 0644)
         expect(Process).to receive(:gid=).with(200).and_raise(Errno::EPERM, "not allowed")
         expected_message = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
         expect(application.set_privileges).to eq([1, expected_message])
