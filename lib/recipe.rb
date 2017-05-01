@@ -113,11 +113,9 @@ schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /tr
 EOH
   end
 
-
-
 else # not windows
 
-init_script = <<'INIT_SCRIPT'
+  init_script = <<'INIT_SCRIPT'
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          automate-liveness-agent
@@ -185,22 +183,22 @@ case "$1" in
 esac
 INIT_SCRIPT
 
-file init_script_path do
-  content(init_script)
-  mode 0755
-  owner 'root'
-end
+  file init_script_path do
+    content(init_script)
+    mode 0755
+    owner 'root'
+  end
 
-service 'automate-liveness-agent' do
-  supports(
-    start: true,
-    stop: true,
-    restart: true,
-    uninstall: true,
-    status: false,
-    reload: false
-  )
-  action [:enable, :start]
-end
+  service 'automate-liveness-agent' do
+    supports(
+      start: true,
+      stop: true,
+      restart: true,
+      uninstall: true,
+      status: false,
+      reload: false
+    )
+    action [:enable, :start]
+  end
 
 end # not windows
