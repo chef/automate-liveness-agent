@@ -18,6 +18,35 @@ Run the full kitchen acceptance suite
 rake compile_recipe && kitchen test
 ```
 
+#### Recipe and Init Script Testing
+
+##### Recipe Multi-Run Test
+
+Run this recipe at least 2x so we know it works continuously
+
+```
+kitchen converge PLATFORM
+kitchen converge PLATFORM
+```
+
+##### Init Script Acceptance Test
+
+Test all the functions of the init script:
+
+* start is run in kitchen
+* stop
+* restart
+* uninstall
+
+##### Chef Client Uninstall Detection
+
+This only applies on UNIX-like systems.
+
+* Start the agent
+* Uninstall the Chef Client package
+* The agent should log a message about chef client uninstall and exit on
+  next iteration.
+
 #### Memory and Log Rotation Testing
 
 Set the following environment variables:
@@ -91,3 +120,8 @@ Set the version in `lib/automate_liveness_agent/version.rb`
 
 Commit and push the version number update.
 
+#### Deploy the New Release to Chef Internal Infrastructure
+
+TODO: describe this process:
+* how to deploy it
+* how to confirm it works
