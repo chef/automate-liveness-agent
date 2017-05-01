@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# exit early if we're running on an unsupported platform
+return unless %w(debian rhel).include?(node['platform_family'])
+
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
@@ -28,8 +31,8 @@ agent_conf     = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
 agent_username = 'chefautomate'
 server_uri     = URI(Chef::Config[:chef_server_url])
 
-init_script_path = value_for_platform(
-  %i(debian ubuntu centos) => { default: '/etc/init.d/automate-liveness-agent' }
+init_script_path = value_for_platform_family(
+  %i(debian rhel) => '/etc/init.d/automate-liveness-agent'
 )
 
 user agent_username do

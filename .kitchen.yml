@@ -13,29 +13,108 @@ provisioner:
 
 verifier:
   name: inspec
+  inspec_tests:
+    - test/integration/default
 
 platforms:
-  # Commented platforms are platforms that aren't supported yet.
   #
-  # freely available bento boxes
+  # supported platforms
   #
-  # (chef 13 appears to be broken on debian)
-  # - name: debian-7.11
-  # - name: debian-8.7
+  - name: debian-7.11
+    provisioner:
+      # chef-client 13 is currently broken on debian
+      require_chef_omnibus: 12
+  - name: debian-8.7
+    provisioner:
+      # chef-client 13 is currently broken on debian
+      require_chef_omnibus: 12
+  - name: ubuntu-12.04-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/ubuntu-12.04
   - name: ubuntu-12.04
+  - name: ubuntu-14.04-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/ubuntu-12.04
   - name: ubuntu-14.04
+  - name: ubuntu-16.04-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/ubuntu-16.04
   - name: ubuntu-16.04
   - name: ubuntu-16.10
+  - name: ubuntu-16.10-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/ubuntu-16.10
   - name: centos-5.11
+  - name: centos-5.11-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/centos-5.11
   - name: centos-6.8
+  - name: centos-6.8-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/centos-6.8
   - name: centos-7.3
-  #- name: fedora-7.25
-  #- name: oracle-5.11
-  #- name: oracle-6.8
-  #- name: oracle-7.3
-  #- name: freebsd-10.3
-  #- name: freebsd-11.0
-  #- name: opensuse-leap-42.2
+  - name: centos-7.3-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/centos-7.3
+  #
+  # unsupported platforms
+  #
+  - name: fedora-24
+  - name: fedora-24-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/oracle-7.26
+  - name: oracle-5.11
+  - name: oracle-5.11-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/oracle-5.11
+  - name: oracle-6.8
+  - name: oracle-6.8-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/oracle-6.8
+  - name: oracle-7.3
+  - name: oracle-7.3-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/oracle-7.3
+  - name: freebsd-10.3
+  - name: freebsd-10.3-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/freebsd-10.3-12
+  - name: freebsd-11.0
+  - name: freebsd-11.0-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/freebsd-11.0-12
+  - name: opensuse-leap-42.2
+  - name: opensuse-leap-42.2-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/opensuse-leap-42.2-12
   #
   # maybe working windows boxes
   #
@@ -67,7 +146,53 @@ platforms:
   #- name: solaris-11
 
 suites:
-  - name: default
+  - name: supported
     run_list:
       - recipe[liveness-agent-test::default]
+      - recipe[liveness-agent-test::faux-automate]
+      - recipe[liveness-agent-test::test-client]
     attributes:
+    verifier:
+      controls:
+        - supported-platform
+    includes:
+      - debian-7.11
+      - debian-8.7
+      - ubuntu-12.04-12
+      - ubuntu-12.04
+      - ubuntu-14.04-12
+      - ubuntu-14.04
+      - ubuntu-16.04-12
+      - ubuntu-16.04
+      - ubuntu-16.04-12
+      - ubuntu-16.10
+      - ubuntu-16.10-12
+      - centos-5.11
+      - centos-5.11-12
+      - centos-6.8
+      - centos-6.8-12
+      - centos-7.3
+      - centos-7.3-12
+  - name: unsupported
+    run_list:
+      - recipe[liveness-agent-test::default]
+      - recipe[liveness-agent-test::test-client]
+    attributes:
+    verifier:
+      controls:
+        - unsupported-platform
+    includes:
+      - fedora-24
+      - fedora-24-12
+      - oracle-5.11
+      - oracle-5.11-12
+      - oracle-6.8
+      - oracle-6.8-12
+      - oracle-7.3
+      - oracle-7.3-12
+      - freebsd-10.3
+      - freebsd-10.3-12
+      - freebsd-11.0
+      - freebsd-11.0-12
+      - opensuse-leap-42.2
+      - opensuse-leap-42.2-12
