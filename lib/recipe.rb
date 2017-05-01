@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 # exit early if we're running on an unsupported platform
-return unless %w(debian rhel).include?(node['platform_family'])
+return unless %w(debian rhel amazon).include?(node['platform_family'])
 
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
@@ -32,7 +32,7 @@ agent_username = 'chefautomate'
 server_uri     = URI(Chef::Config[:chef_server_url])
 
 init_script_path = value_for_platform_family(
-  %i(debian rhel) => '/etc/init.d/automate-liveness-agent'
+  %i(debian rhel amazon) => '/etc/init.d/automate-liveness-agent'
 )
 
 user agent_username do
