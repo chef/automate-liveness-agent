@@ -18,6 +18,58 @@ Run the full kitchen acceptance suite
 rake compile_recipe && kitchen test
 ```
 
+#### Recipe and Init Script Testing
+
+##### Recipe Multi-Run Test
+
+Run this recipe at least 2x so we know it works continuously
+
+```
+kitchen test PLATFORM -d never
+kitchen login PLATFORM
+sudo -i
+INTERVAL=2 chef-client -z -c /tmp/kitchen/test-client.rb -j /tmp/kitchen/test-attrs.json
+```
+
+##### Init Script Acceptance Test
+
+Test all the functions of the init script. Check the output of `ps` to
+verify.
+
+* start, when stopped, starts it
+* start, when started, does not start another one
+* stop, when started, stops it
+* stop, when stopped, says service not running
+* restart, when stopped, starts it
+* restart, when running, stops the running one and starts a new one
+* uninstall
+
+##### Logging Test
+
+Ensure the agent is correctly logging. The logfile should be owned by
+the non-root user we create for the agent.
+
+##### Chef Client Uninstall Detection
+
+This only applies on UNIX-like systems.
+
+Stop the agent and then start it with a more reasonable interval for
+testing:
+
+```
+/etc/init.d/automate-liveness-agent stop
+INTERVAL=1 /etc/init.d/automate-liveness-agent start
+```
+
+Uninstall the Chef Client package. System dependent, but `dpkg -P chef`
+works on ubuntu.
+
+Check the logs and confirm that the agent shut itself down:
+
+```
+tail /var/log/chef/automate-liveness-agent.log
+```
+
 #### Memory and Log Rotation Testing
 
 Set the following environment variables:
@@ -36,7 +88,12 @@ The agent must have the following config enabled:
 * `log_file` configured to log to a file (not `STDOUT`)
 * `unprivileged_uid` and `unprivileged_gid` set to non-root values
 
-Start the agent. Take note of the log messages about the ruby heap
+Start the agent. The full command in kitchen is:
+
+```
+/etc/init.d/automate-liveness-agent stop
+
+Take note of the log messages about the ruby heap
 stats; they look like this:
 
 ```
@@ -91,3 +148,8 @@ Set the version in `lib/automate_liveness_agent/version.rb`
 
 Commit and push the version number update.
 
+#### Deploy the New Release to Chef Internal Infrastructure
+
+TODO: describe this process:
+* how to deploy it
+* how to confirm it works
