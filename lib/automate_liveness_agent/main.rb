@@ -36,6 +36,8 @@ module AutomateLivenessAgent
 
     PIDFILE_LOCATION = "/var/run/automate-liveness-agent.pid".freeze
 
+    WRITE_MODE = "w".freeze
+
     attr_reader :argv
     attr_reader :config_path
     attr_reader :config
@@ -50,6 +52,7 @@ module AutomateLivenessAgent
       @config_path = nil
       @config = Config.new(nil)
       @logger = nil
+      @pidfile_handle = nil
     end
 
     def run
@@ -86,6 +89,9 @@ module AutomateLivenessAgent
     end
 
     def set_privileges
+      unless config.scheduled_task_mode
+        @pidfile_handle = File.open(PIDFILE_LOCATION, WRITE_MODE, 0644)
+      end
       unless config.unprivileged_gid.nil?
         Process.gid = config.unprivileged_gid
       end
@@ -93,9 +99,12 @@ module AutomateLivenessAgent
         Process.uid = config.unprivileged_uid
       end
       SUCCESS
+    rescue Errno::EACCES
+      msg = "Unable to open pidfile at #{PIDFILE_LOCATION} (current uid: #{Process.uid})"
+      [ 1, msg ]
     rescue Errno::EPERM
       msg = "You must run as root to change privileges, or you can set unprivileged_uid and unprivileged_gid to null to disable privilege changes"
-      [ 1,  msg ]
+      [ 1, msg ]
     end
 
     # This intentionally comes after #set_privileges. Depending on config and
@@ -114,7 +123,10 @@ module AutomateLivenessAgent
         a.update
       else
         Process.daemon
-        File.open(PIDFILE_LOCATION, "w") { |f| f.write(Process.pid) }
+        if @pidfile_handle
+         @pidfile_handle.write(Process.pid)
+         @pidfile_handle.close
+        end
         a.main_loop
       end
       SUCCESS
