@@ -8,6 +8,12 @@ RSpec.describe AutomateLivenessAgent::Main do
     expect(application.argv).to eq(argv)
   end
 
+  before do
+    # use code like this to override the stub:
+    #   expect(Process).to receive(:daemon).and_return(nil)
+    allow(Process).to receive(:daemon).and_raise("Stub calls to Process.daemon")
+  end
+
   describe "handling CLI arguments" do
 
     let(:result) { application.handle_argv }
@@ -132,6 +138,7 @@ RSpec.describe AutomateLivenessAgent::Main do
       it "sets uid and gid" do
         expect(Process).to receive(:uid=).with(100)
         expect(Process).to receive(:gid=).with(200)
+        expect(File).to receive(:open).with("/var/run/automate-liveness-agent.pid", "w", 0644)
         application.set_privileges
       end
 
@@ -155,6 +162,7 @@ RSpec.describe AutomateLivenessAgent::Main do
     context "with a valid configuration" do
 
       it "runs the update sender's main loop" do
+        expect(Process).to receive(:daemon).and_return(nil)
         expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
           with(application.config, application.logger).
           and_return(update_sender)
@@ -169,8 +177,6 @@ RSpec.describe AutomateLivenessAgent::Main do
       it "exits 1 with the error message" do
         expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
           with(application.config, application.logger).
-          and_return(update_sender)
-        expect(update_sender).to receive(:main_loop).
           and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
         expected = [ 1, "explanation of problem" ]
         expect(application.send_keepalives).to eq(expected)
