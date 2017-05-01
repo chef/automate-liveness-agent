@@ -23,6 +23,7 @@ agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
 agent_log_dir  = Chef::Config.platform_specific_path('/var/log/chef')
+agent_log_file = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
 agent_bin      = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf     = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
 agent_username = 'chefautomate'
@@ -37,10 +38,15 @@ user agent_username do
   shell '/bin/nologin' unless windows
 end
 
-[agent_bin_dir, agent_etc_dir, agent_log_dir].each do |dir|
+[agent_bin_dir, agent_etc_dir].each do |dir|
   directory dir do
     recursive true
   end
+end
+
+directory agent_log_dir do
+  owner agent_username
+  recursive true
 end
 
 file agent_bin do
@@ -54,7 +60,7 @@ file agent_conf do
   owner 'root'
   content(
     lazy do
-      {
+      JSON.pretty_generate({
         'chef_server_fqdn'   => server_uri.host,
         'client_key_path'    => Chef::Config[:client_key],
         'client_name'        => node.name,
@@ -64,7 +70,8 @@ file agent_conf do
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
         'unprivileged_uid'   => Etc.getpwnam(agent_username).uid,
         'unprivileged_gid'   => Etc.getpwnam(agent_username).gid,
-      }.to_json
+        'log_file'           => agent_log_file,
+      })
     end
   )
 end
@@ -84,16 +91,14 @@ SCRIPT="RUBYOPT='--disable-gems' RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500 /var/opt/chef
 RUNAS=root
 
 PIDFILE=/var/run/automate-liveness-agent.pid
-LOGFILE=/var/log/chef/automate-liveness-agent.log
 
 start() {
-  if [ -f /var/run/$PIDNAME ] && kill -0 $(cat /var/run/$PIDNAME); then
+  if [ -f $PIDFILE ] && kill -0 $(cat $PIDFILE); then
     echo 'Service already running' >&2
     return 1
   fi
   echo 'Starting service…' >&2
-  local CMD="$SCRIPT &> \"$LOGFILE\" & echo \$!"
-  su -c "$CMD" $RUNAS
+  su -c "$SCRIPT" $RUNAS
   echo 'Service started' >&2
 }
 
@@ -115,7 +120,6 @@ uninstall() {
   if [ "$SURE" = "yes" ]; then
     stop
     rm -f "$PIDFILE"
-    echo "Notice: log file is not be removed: '$LOGFILE'" >&2
     update-rc.d -f automate-liveness-agent remove
     rm -fv "$0"
   fi
