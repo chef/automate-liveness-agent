@@ -53,10 +53,22 @@ the non-root user we create for the agent.
 
 This only applies on UNIX-like systems.
 
-* Start the agent
-* Uninstall the Chef Client package
-* The agent should log a message about chef client uninstall and exit on
-  next iteration.
+Stop the agent and then start it with a more reasonable interval for
+testing:
+
+```
+/etc/init.d/automate-liveness-agent stop
+INTERVAL=1 /etc/init.d/automate-liveness-agent start
+```
+
+Uninstall the Chef Client package. System dependent, but `dpkg -P chef`
+works on ubuntu.
+
+Check the logs and confirm that the agent shut itself down:
+
+```
+tail /var/log/chef/automate-liveness-agent.log
+```
 
 #### Memory and Log Rotation Testing
 
@@ -76,7 +88,12 @@ The agent must have the following config enabled:
 * `log_file` configured to log to a file (not `STDOUT`)
 * `unprivileged_uid` and `unprivileged_gid` set to non-root values
 
-Start the agent. Take note of the log messages about the ruby heap
+Start the agent. The full command in kitchen is:
+
+```
+/etc/init.d/automate-liveness-agent stop
+
+Take note of the log messages about the ruby heap
 stats; they look like this:
 
 ```
