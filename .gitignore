@@ -11,3 +11,4 @@
 /config.json
 /build/*
 */.kitchen/*
+/test/cookbooks/liveness-agent-test/recipes/compiled-recipe.rb
