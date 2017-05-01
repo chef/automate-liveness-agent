@@ -20,11 +20,10 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-windows = node['platform_family'] == 'windows'
 
 run_interval   = 1 # only windows
-install_user   = windows ? 'administrator' : 'root'
-install_group  = windows ? 'Administrators' : 'wheel'
+install_user   = platform?('windows') ? 'administrator' : 'root'
+install_group  = platform?('windows') ? 'Administrators' : 'wheel'
 agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
@@ -41,7 +40,7 @@ init_script_path = value_for_platform_family(
 
 user agent_username do
   home agent_dir
-  shell '/bin/nologin' unless windows
+  shell '/bin/nologin' unless platform?('windows')
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|
@@ -76,8 +75,8 @@ file agent_conf do
         'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file' => Gem.ruby,
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => windows ? nil : Etc.getpwnam(agent_username).uid,
-        'unprivileged_gid'   => windows ? nil : Etc.getpwnam(agent_username).gid,
+        'unprivileged_uid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).uid,
+        'unprivileged_gid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).gid,
         'log_file'           => agent_log_file,
         'scheduled_task_mode' => platform?('windows')
       })

@@ -7,8 +7,6 @@ driver:
     # TODO: make the port an attribute in the test cookbook so we can enable some
     # concurrency.
     - ["forwarded_port", {guest: 9292, host: 9292}]
-  synced_folders:
-    - ['.', '/vagrant/code']
     
 provisioner:
   name: chef_zero
@@ -126,6 +124,17 @@ platforms:
     driver:
       box: bento/opensuse-leap-42.2-12
   - name: windows-2008-standard
+    driver:
+      box: chef/windows-server-2008r2-standard # private
+      synced_folders:
+      # We have to mount this repos enclosing folder as the Omnibus build
+      # gets cranky if the mounted Chef source folder is a symlink. This
+      # mounts at `C:\vagrant\code` and the Chef source folder is available
+      # at `C:\vagrant\code\chef`
+      - ['.', '/vagrant/code']
+  - name: windows-2008-standard-12
+    provisioner:
+      require_chef_omnibus: 12
     driver:
       box: chef/windows-server-2008r2-standard # private
       synced_folders:
