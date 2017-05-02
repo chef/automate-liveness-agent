@@ -257,6 +257,34 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
+  - name: windows-2012-standard
+    driver:
+      box: chef/windows-server-2012r2-standard # private
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows2012r2
+    verifier:
+      attributes:
+        org_name: windows2012r2
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
+  - name: windows-2012-standard-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/windows-server-2012r2-standard # private
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows2012r2
+    verifier:
+      attributes:
+        org_name: windows2012r2
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
   #
   # unsupported platforms
   #
@@ -302,22 +330,6 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: bento/opensuse-leap-42.2-12
-  #
-  # maybe working windows boxes
-  #
-  #- name: windows-2012r2
-  #  driver:
-  #    box: mwrock/Windows2012R2
-  #- name: windows-2016
-  #  driver:
-  #    box: mwrock/Windows2016
-  #- name: windows-nano
-  #  driver:
-  #    box: mwrock/WindowsNano
-  #- name: windows-8.1
-  #  driver:
-  #    box: mwrock/windows8.1-amd64
-  #
   # proprietary boxes that must be built locally
   #
   #- name: rhel-5.11
@@ -367,6 +379,8 @@ suites:
       - amazon-linux-12
       - windows-2008-standard
       - windows-2008-standard-12
+      - windows-2012-standard
+      - windows-2012-standard-12
   - name: unsupported
     run_list:
       - recipe[liveness-agent-test::test-client]
