@@ -15,7 +15,9 @@ TEST_BUILD_ARTIFACT=1 bundle exec rake
 Run the full kitchen acceptance suite
 
 ```
-rake compile_recipe && kitchen test
+rake compile_recipe
+kitchen converge automate
+kitchen test supported
 ```
 
 #### Recipe and Init Script Testing

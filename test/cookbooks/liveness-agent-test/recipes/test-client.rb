@@ -1,10 +1,14 @@
-kitchen_root = node['liveness-agent-test']['kitchen_root']
+kitchen_root = platform_family?('windows') ? :: File.join(ENV['TEMP'], 'kitchen') : '/tmp/kitchen'
+host         = node['liveness-agent-test']['automate']['host']
+port         = node['liveness-agent-test']['automate']['port']
+org_name     = node['liveness-agent-test']['automate']['org_name']
+server_url   = "http://#{host}:#{port}/organizations/#{org_name}/data-collector"
 
 # Create a client.rb that will hit our fake chef automate
 client_content = ::File.read(::File.join(kitchen_root, 'client.rb'))
-client_content << "\ndata_collector['server_url'] = 'http://localhost:9292/data-collector/v0'"
+client_content << "\ndata_collector['server_url'] = '#{server_url}'"
 client_content << "\ndata_collector['mode'] = :both"
-client_content << "\ndata_collector['organization'] = 'default'"
+client_content << "\ndata_collector['organization'] = '#{org_name}'"
 
 file ::File.join(kitchen_root, 'test-client.rb') do
   content client_content
