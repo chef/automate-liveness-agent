@@ -23,6 +23,10 @@ return unless %w(
   windows
 ).include?(node['platform_family'])
 
+# windows 10 and greater not supported yet; improve this somehow
+return if platform('windows') && node['platform_version'] =~ /^1[0-9]\./
+
+
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
