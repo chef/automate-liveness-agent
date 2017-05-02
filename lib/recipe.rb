@@ -59,6 +59,8 @@ file agent_bin do
   owner install_user
   group install_group
   content liveness_agent
+
+  notifies :restart, 'service[automate-liveness-agent]' unless platform?('windows')
 end
 
 file agent_conf do
