@@ -27,6 +27,7 @@ module AutomateLivenessAgent
 
     DEBUG = "DEBUG".freeze
 
+    # fix travis
     RETRY_LIMIT = 5
 
     ERROR = "Error".freeze
