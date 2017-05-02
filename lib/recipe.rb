@@ -23,7 +23,7 @@ liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
 run_interval   = 1 # only windows
 install_user   = platform?('windows') ? 'administrator' : 'root'
-install_group  = platform?('windows') ? 'Administrators' : 'wheel'
+install_group  = platform?('windows') ? 'Administrators' : 'root'
 agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
@@ -61,6 +61,9 @@ file agent_bin do
   content liveness_agent
 end
 
+
+trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
+
 file agent_conf do
   mode 0755
   owner install_user
@@ -75,9 +78,13 @@ file agent_conf do
         'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file' => Gem.ruby,
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).uid,
-        'unprivileged_gid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).gid,
+        'unprivileged_uid'   => platform?('windows') ? nil : Etc.getpwnam(agent_username).uid,
+        'unprivileged_gid'   => platform?('windows') ? nil : Etc.getpwnam(agent_username).gid,
         'log_file'           => agent_log_file,
+        'ssl_verify_mode'    => Chef::Config[:ssl_verify_mode],
+        'ssl_ca_file'        => Chef::Config[:ssl_ca_file],
+        'ssl_ca_path'        => Chef::Config[:ssl_ca_path],
+        'trusted_certs_dir'  => trusted_certs_dir,
         'scheduled_task_mode' => platform?('windows')
       })
     end
