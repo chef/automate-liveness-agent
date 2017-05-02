@@ -20,8 +20,10 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-windows = node['platform_family'] == 'windows'
 
+run_interval   = 1 # only windows
+install_user   = platform?('windows') ? 'administrator' : 'root'
+install_group  = platform?('windows') ? 'Administrators' : 'wheel'
 agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
@@ -38,7 +40,7 @@ init_script_path = value_for_platform_family(
 
 user agent_username do
   home agent_dir
-  shell '/bin/nologin' unless windows
+  shell '/bin/nologin' unless platform?('windows')
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|
@@ -54,13 +56,15 @@ end
 
 file agent_bin do
   mode 0755
-  owner 'root'
+  owner install_user
+  group install_group
   content liveness_agent
 end
 
 file agent_conf do
   mode 0755
-  owner 'root'
+  owner install_user
+  group install_group
   content(
     lazy do
       JSON.pretty_generate({
@@ -71,15 +75,46 @@ file agent_conf do
         'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file' => Gem.ruby,
         'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => Etc.getpwnam(agent_username).uid,
-        'unprivileged_gid'   => Etc.getpwnam(agent_username).gid,
+        'unprivileged_uid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).uid,
+        'unprivileged_gid'   => platform('windows') ? nil : Etc.getpwnam(agent_username).gid,
         'log_file'           => agent_log_file,
+        'scheduled_task_mode' => platform?('windows')
       })
     end
   )
 end
 
-init_script = <<'INIT_SCRIPT'
+if platform?('windows')
+
+  # In windows we run things as as a scheduled task instead of a daemon
+  # This avoids the code overhead of a service, and isn't too inefficient since we run infrequently
+  scheduled_task_script = ChefConfig::PathHelper.join(agent_bin_dir, "automate_liveness_agent_task.ps1")
+
+  # We hide configuration details in this script; it was too much to pass on the schtasks command line
+  file scheduled_task_script do
+    mode 0755
+    owner install_user
+    group install_group
+    content <<"SCRIPT_BODY"
+# powershell script to run the Chef automate liveness agent as a scheduled task\r\n
+$env:RUBYOPT = "--disable-gems"\r\n
+$env:RUBY_GC_HEAP_GROWTH_MAX_SLOTS = 500\r\n
+#{Gem.ruby} #{agent_bin} #{agent_conf}\r\n
+SCRIPT_BODY
+    # debugging add Get-Date -Format g | Out-File c:\\chef\\script.log\r\n to script above
+  end
+
+  # Set up scheduled task; this is idempotent because scheduled tasks replace ones with same name
+  powershell_script 'Setup scheduled task' do
+    # If we are running powershell > 3, there's a nice API to do this, but 2008r2 doesn't provide that
+    code <<-EOH
+schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /tr "powershell.exe -windowstyle hidden #{scheduled_task_script}"
+EOH
+  end
+
+else # not windows
+
+  init_script = <<'INIT_SCRIPT'
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          automate-liveness-agent
@@ -147,20 +182,22 @@ case "$1" in
 esac
 INIT_SCRIPT
 
-file init_script_path do
-  content(init_script)
-  mode 0755
-  owner 'root'
-end
+  file init_script_path do
+    content(init_script)
+    mode 0755
+    owner 'root'
+  end
 
-service 'automate-liveness-agent' do
-  supports(
-    start: true,
-    stop: true,
-    restart: true,
-    uninstall: true,
-    status: false,
-    reload: false
-  )
-  action [:enable, :start]
-end
+  service 'automate-liveness-agent' do
+    supports(
+      start: true,
+      stop: true,
+      restart: true,
+      uninstall: true,
+      status: false,
+      reload: false
+    )
+    action [:enable, :start]
+  end
+
+end # not windows
