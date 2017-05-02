@@ -92,6 +92,7 @@ Start the agent. The full command in kitchen is:
 
 ```
 /etc/init.d/automate-liveness-agent stop
+```
 
 Take note of the log messages about the ruby heap
 stats; they look like this:
