@@ -90,10 +90,11 @@ The agent must have the following config enabled:
 * `log_file` configured to log to a file (not `STDOUT`)
 * `unprivileged_uid` and `unprivileged_gid` set to non-root values
 
-Start the agent. The full command in kitchen is:
+Start the agent. The full command inside a kitchen VM is:
 
 ```
 /etc/init.d/automate-liveness-agent stop
+INTERVAL=1 LOGGER_STRESS_MODE=1 /etc/init.d/automate-liveness-agent start
 ```
 
 Take note of the log messages about the ruby heap
