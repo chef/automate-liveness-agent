@@ -13,26 +13,26 @@
 #  limitations under the License.
 
 # exit early if we're running on an unsupported platform
-return unless %w(debian rhel amazon).include?(node['platform_family'])
+return unless %w(debian rhel amazon windows).include?(node['platform_family'])
 
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-
-run_interval   = 1 # only windows
-install_user   = platform?('windows') ? 'administrator' : 'root'
-install_group  = platform?('windows') ? 'Administrators' : 'root'
-agent_dir      = Chef::Config.platform_specific_path('/var/opt/chef/')
-agent_bin_dir  = ChefConfig::PathHelper.join(agent_dir, 'bin')
-agent_etc_dir  = ChefConfig::PathHelper.join(agent_dir, 'etc')
-agent_log_dir  = Chef::Config.platform_specific_path('/var/log/chef')
-agent_log_file = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
-agent_bin      = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
-agent_conf     = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
-agent_username = 'chefautomate'
-server_uri     = URI(Chef::Config[:chef_server_url])
+run_interval      = 1 # only windows
+install_user      = platform?('windows') ? 'administrator' : 'root'
+install_group     = platform?('windows') ? 'Administrators' : 'root'
+agent_dir         = Chef::Config.platform_specific_path('/var/opt/chef/')
+agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
+agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
+agent_log_dir     = Chef::Config.platform_specific_path('/var/log/chef')
+agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
+agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
+agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
+agent_username    = 'chefautomate'
+server_uri        = URI(Chef::Config[:chef_server_url])
+trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 
 init_script_path = value_for_platform_family(
   %i(debian rhel amazon) => '/etc/init.d/automate-liveness-agent'
@@ -61,16 +61,13 @@ file agent_bin do
   content liveness_agent
 end
 
-
-trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
-
 file agent_conf do
   mode 0755
   owner install_user
   group install_group
   content(
     lazy do
-      JSON.pretty_generate({
+      Chef::JSONCompat.to_json_pretty(
         'chef_server_fqdn'   => server_uri.host,
         'client_key_path'    => Chef::Config[:client_key],
         'client_name'        => node.name,
@@ -86,9 +83,11 @@ file agent_conf do
         'ssl_ca_path'        => Chef::Config[:ssl_ca_path],
         'trusted_certs_dir'  => trusted_certs_dir,
         'scheduled_task_mode' => platform?('windows')
-      })
+      )
     end
   )
+
+  notifies :restart, 'service[automate-liveness-agent]' unless platform?('windows')
 end
 
 if platform?('windows')
@@ -193,6 +192,7 @@ INIT_SCRIPT
     content(init_script)
     mode 0755
     owner 'root'
+    notifies :restart, 'service[automate-liveness-agent]'
   end
 
   service 'automate-liveness-agent' do

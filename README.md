@@ -106,6 +106,7 @@ To test the compiled recipe on a target platform:
 
 ```
 rake compile_recipe
+kitchen converge required-faux-chef-automate
 kitchen test $target-platform
 ```
 

@@ -2,21 +2,46 @@
 driver:
   name: vagrant
   network:
-    # The 'http' inspec resource current executes from the host machine so we'll
-    # have to forward the port to the guest.
-    # TODO: make the port an attribute in the test cookbook so we can enable some
-    # concurrency.
-    - ["forwarded_port", {guest: 9292, host: 9292}]
-    
+    - ["private_network", {type: "dhcp"}]
+
 provisioner:
   name: chef_zero
 
 verifier:
   name: inspec
-  inspec_tests:
-    - test/integration/default
+  attributes:
+    # The 'http' inspec resource current executes on the host machine.
+    # As we rely on it to verify that the liveness agent is updating the
+    # faux Chef Automate we'll forward the port and execute the http
+    # requests against localhost.
+    port: 9292
+    host: localhost
+
+attributes:
+  liveness-agent-test:
+    automate:
+      port: 9292
 
 platforms:
+  #
+  # The test harness requires that the faux Automate server is running. Before
+  # verifying any suite you need to make sure the Automate server is up.
+  #
+  #     kitchen converge required-faux-chef-automate
+  #
+  - name: faux-chef-automate
+    driver:
+      box: bento/ubuntu-16.04
+      vm_hostname: fauxautomate
+      network:
+        # The 'http' inspec resource current executes on the host machine.
+        # As we rely on it to verify that the liveness agent is updating the
+        # faux Chef Automate we'll forward the port and execute the http
+        # requests against localhost.
+        - ["forwarded_port", {guest: 9292, host: 9292}]
+        # This IP address is hardcoded into the test node chef-client config.
+        # If you change it here you'll need to update the test cookbook.
+        - ["private_network", {ip: "192.168.33.66"}]
   #
   # supported platforms
   #
@@ -24,60 +49,214 @@ platforms:
     provisioner:
       # chef-client 13 is currently broken on debian
       require_chef_omnibus: 12
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: debian711
+    verifier:
+      attributes:
+        org_name: debian711
   - name: debian-8.7
     provisioner:
       # chef-client 13 is currently broken on debian
       require_chef_omnibus: 12
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: debian87
+    verifier:
+      attributes:
+        org_name: debian87
+  - name: ubuntu-12.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu1204
+    verifier:
+      attributes:
+        org_name: ubuntu1204
   - name: ubuntu-12.04-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/ubuntu-12.04
-  - name: ubuntu-12.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu120412
+    verifier:
+      attributes:
+        org_name: ubuntu120412
   - name: ubuntu-14.04-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/ubuntu-12.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu140412
+    verifier:
+      attributes:
+        org_name: ubuntu140412
   - name: ubuntu-14.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu1404
+    verifier:
+      attributes:
+        org_name: ubuntu1404
+  - name: ubuntu-16.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu1604
+    verifier:
+      attributes:
+        org_name: ubuntu1604
   - name: ubuntu-16.04-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/ubuntu-16.04
-  - name: ubuntu-16.04
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu160412
+    verifier:
+      attributes:
+        org_name: ubuntu160412
   - name: ubuntu-16.10
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu1610
+    verifier:
+      attributes:
+        org_name: ubuntu1610
   - name: ubuntu-16.10-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/ubuntu-16.10
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: ubuntu161012
+    verifier:
+      attributes:
+        org_name: ubuntu161012
   - name: centos-5.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos511
+    verifier:
+      attributes:
+        org_name: centos511
   - name: centos-5.11-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/centos-5.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos51112
+    verifier:
+      attributes:
+        org_name: centos51112
   - name: centos-6.8
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos68
+    verifier:
+      attributes:
+        org_name: centos68
   - name: centos-6.8-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/centos-6.8
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos6812
+    verifier:
+      attributes:
+        org_name: centos6812
   - name: centos-7.3
+    attributes:
+      liveness-agent-test:
+        org_name: centos73
+    verifier:
+      attributes:
+        automate:
+          org_name: centos73
   - name: centos-7.3-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/centos-7.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos7312
+    verifier:
+      attributes:
+        org_name: centos7312
   - name: amazon-linux
     driver:
       box: mvbcoding/awslinux
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: amazonlinux
+    verifier:
+      attributes:
+        org_name: amazonlinux
   - name: amazon-linux-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: mvbcoding/awslinux
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: amazonlinux12
+    verifier:
+      attributes:
+        org_name: amazonlinux12
+  - name: windows-2008-standard
+    driver:
+      box: chef/windows-server-2008r2-standard # private
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows2008r2
+    verifier:
+      attributes:
+        org_name: windows2008r2
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
+  - name: windows-2008-standard-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/windows-server-2008r2-standard # private
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows2008r2
+    verifier:
+      attributes:
+        org_name: windows2008r2
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
   #
   # unsupported platforms
   #
@@ -123,26 +302,6 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: bento/opensuse-leap-42.2-12
-  - name: windows-2008-standard
-    driver:
-      box: chef/windows-server-2008r2-standard # private
-      synced_folders:
-      # We have to mount this repos enclosing folder as the Omnibus build
-      # gets cranky if the mounted Chef source folder is a symlink. This
-      # mounts at `C:\vagrant\code` and the Chef source folder is available
-      # at `C:\vagrant\code\chef`
-      - ['.', '/vagrant/code']
-  - name: windows-2008-standard-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: chef/windows-server-2008r2-standard # private
-      synced_folders:
-      # We have to mount this repos enclosing folder as the Omnibus build
-      # gets cranky if the mounted Chef source folder is a symlink. This
-      # mounts at `C:\vagrant\code` and the Chef source folder is available
-      # at `C:\vagrant\code\chef`
-      - ['.', '/vagrant/code']
   #
   # maybe working windows boxes
   #
@@ -174,15 +333,18 @@ platforms:
   #- name: solaris-11
 
 suites:
+  - name: required
+    run_list:
+      - recipe[liveness-agent-test::faux-automate]
+    includes:
+      - faux-chef-automate
   - name: supported
     run_list:
-      - recipe[liveness-agent-test::default]
-      - recipe[liveness-agent-test::faux-automate]
       - recipe[liveness-agent-test::test-client]
     attributes:
     verifier:
-      controls:
-        - supported-platform
+      inspec_tests:
+        - test/integration/supported-platform
     includes:
       - debian-7.11
       - debian-8.7
@@ -203,14 +365,14 @@ suites:
       - centos-7.3-12
       - amazon-linux
       - amazon-linux-12
+      - windows-2008-standard
+      - windows-2008-standard-12
   - name: unsupported
     run_list:
-      - recipe[liveness-agent-test::default]
       - recipe[liveness-agent-test::test-client]
     attributes:
-    verifier:
-      controls:
-        - unsupported-platform
+      inspec_tests:
+        - test/integration/supported-platform
     includes:
       - fedora-24
       - fedora-24-12
@@ -226,4 +388,3 @@ suites:
       - freebsd-11.0-12
       - opensuse-leap-42.2
       - opensuse-leap-42.2-12
-      - windows-2008-standard

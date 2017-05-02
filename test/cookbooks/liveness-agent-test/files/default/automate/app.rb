@@ -2,34 +2,42 @@ require "json"
 require "sinatra"
 
 set :environment, :production
+set :bind, "0.0.0.0"
 
 class Pings
-  def self.reset
-    @@pings = 0
+  def self.reset(org)
+    _pings[org] = 0
   end
 
-  def self.increment
-    @@pings += 1
+  def self.increment(org)
+    _pings[org] += 1
   end
 
-  def self.count
+  def self.count(org)
+    _pings[org]
+  end
+
+  def self.reset_all
+    @@pings = nil
+  end
+
+  def self._pings
+    @@pings ||= Hash.new { |h, k| h[k] = 0 }
     @@pings
   end
 end
 
-Pings.reset
-
-get "/reset-pings" do
-  Pings.reset
-  Pings.count.to_s
+get "/organizations/:org/reset-pings" do |org|
+  Pings.reset(org)
+  Pings.count(org).to_s
 end
 
-get "/pings" do
-  request.logger.info "Pings count #{Pings.count}"
-  Pings.count.to_s
+get "/organizations/:org/pings" do |org|
+  request.logger.info "Pings count #{Pings.count(org)}"
+  Pings.count(org).to_s
 end
 
-post "/data-collector/v0" do
+post "/organizations/:org/data-collector" do |org|
   body = request.body.read
   payload = JSON.parse(body)
 
@@ -38,7 +46,7 @@ post "/data-collector/v0" do
   # is going to receive all sorts of data.  For our tests we only care if
   # the installed liveness agent is sending node_pings, therefore we'll only
   # increment the ping count for that message.
-  Pings.increment if payload.key?("event_type") && payload["event_type"] == "node_ping"
+  Pings.increment(org) if payload.key?("event_type") && payload["event_type"] == "node_ping"
 
   status 201
 end
