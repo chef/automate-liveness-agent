@@ -13,7 +13,14 @@
 #  limitations under the License.
 
 # exit early if we're running on an unsupported platform
-return unless %w(debian rhel amazon windows freebsd).include?(node['platform_family'])
+return unless %w(
+  debian
+  rhel
+  amazon
+  windows
+  freebsd
+  fedora
+).include?(node['platform_family'])
 
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
@@ -33,22 +40,22 @@ server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 
 agent_service_name = value_for_platform_family(
-  %i(windows)            => nil,
-  %i(debian rhel amazon) => 'automate-liveness-agent',
-  %i(freebsd)            => 'automate_liveness_agent'
+  %i(windows)                   => nil,
+  %i(debian rhel amazon fedora) => 'automate-liveness-agent',
+  %i(freebsd)                   => 'automate_liveness_agent'
 )
 init_script_path = value_for_platform_family(
-  %i(debian rhel amazon) => "/etc/init.d/#{agent_service_name}",
-  %i(freebsd)            => "/etc/rc.d/#{agent_service_name}"
+  %i(debian rhel amazon fedora) => "/etc/init.d/#{agent_service_name}",
+  %i(freebsd)                   => "/etc/rc.d/#{agent_service_name}"
 )
 install_user = value_for_platform_family(
-  %i(windows)                    => 'administrator',
-  %i(debian rhel amazon freebsd) => 'root'
+  %i(windows)                           => 'administrator',
+  %i(debian rhel amazon freebsd fedora) => 'root'
 )
 install_group = value_for_platform_family(
-  %i(windows)            => 'administrator',
-  %i(debian rhel amazon) => 'root',
-  %i(freebsd)            => 'wheel'
+  %i(windows)                   => 'administrator',
+  %i(debian rhel amazon fedora) => 'root',
+  %i(freebsd)                   => 'wheel'
 )
 
 user agent_username do
