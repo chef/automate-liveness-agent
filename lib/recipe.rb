@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 # exit early if we're running on an unsupported platform
-return unless %w(debian rhel amazon windows).include?(node['platform_family'])
+return unless %w(debian rhel amazon windows freebsd).include?(node['platform_family'])
 
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
@@ -21,8 +21,6 @@ AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
 run_interval      = 1 # only windows
-install_user      = platform?('windows') ? 'administrator' : 'root'
-install_group     = platform?('windows') ? 'Administrators' : 'root'
 agent_dir         = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
@@ -34,8 +32,23 @@ agent_username    = 'chefautomate'
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 
+agent_service_name = value_for_platform_family(
+  %i(windows)            => nil,
+  %i(debian rhel amazon) => 'automate-liveness-agent',
+  %i(freebsd)            => 'automate_liveness_agent'
+)
 init_script_path = value_for_platform_family(
-  %i(debian rhel amazon) => '/etc/init.d/automate-liveness-agent'
+  %i(debian rhel amazon) => "/etc/init.d/#{agent_service_name}",
+  %i(freebsd)            => "/etc/rc.d/#{agent_service_name}"
+)
+install_user = value_for_platform_family(
+  %i(windows)                    => 'administrator',
+  %i(debian rhel amazon freebsd) => 'root'
+)
+install_group = value_for_platform_family(
+  %i(windows)            => 'administrator',
+  %i(debian rhel amazon) => 'root',
+  %i(freebsd)            => 'wheel'
 )
 
 user agent_username do
@@ -59,6 +72,7 @@ file agent_bin do
   owner install_user
   group install_group
   content liveness_agent
+  notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
 end
 
 file agent_conf do
@@ -87,7 +101,7 @@ file agent_conf do
     end
   )
 
-  notifies :restart, 'service[automate-liveness-agent]' unless platform?('windows')
+  notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
 end
 
 if platform?('windows')
@@ -118,9 +132,77 @@ schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /tr
 EOH
   end
 
-else # not windows
+  # with windows we exit after we start the scheduled task
+  return
+end
 
-  init_script = <<'INIT_SCRIPT'
+init_script =
+  if platform?('freebsd')
+    <<'RC_SCRIPT'
+#!/bin/sh
+#
+# PROVIDE: automate_liveness_agent
+# REQUIRE: LOGIN cleanvar
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="automate_livenss_agent"
+rcvar="automate_livenss_agent_enable"
+pidfile="/var/run/automate-liveness-agent.pid"
+start_cmd="start_automate_liveness_agent"
+stop_cmd="stop_automate_liveness_agent"
+restart_cmd="restart_automate_liveness_agent"
+status_cmd="check_automate_liveness_agent_status"
+extra_commands="status"
+
+load_rc_config $name
+
+start_automate_liveness_agent() {
+ if [ -f "$pidfile" ] && kill -0 `cat "$pidfile"`; then
+    echo 'Service already running' >&2
+    return 1
+  fi
+  echo 'Starting service…' >&2
+
+  RUBYOPT="--disable-gems";
+  RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500;
+  export RUBYOPT
+  export RUBY_GC_HEAP_GROWTH_MAX_SLOTS
+  /var/opt/chef/bin/automate-liveness-agent /var/opt/chef/etc/config.json
+}
+
+stop_automate_liveness_agent() {
+  local pid=`cat $pidfile`
+  if [ ! -f "$pidfile" ] || ! kill -0 "$pid"; then
+    echo 'Service not running' >&2
+    return 1
+  fi
+  echo 'Stopping service…' >&2
+  kill -15 "$pid"
+  rm -f "$pidfile"
+  echo 'Service stopped' >&2
+}
+
+restart_automate_liveness_agent() {
+  stop_automate_liveness_agent
+  start_automate_liveness_agent
+}
+
+check_automate_liveness_agent_status() {
+  if [ -f "$pidfile" ] && kill -0 `cat "$pidfile"`; then
+    echo 'Service is running' >&2
+    return 0
+  else
+    echo 'Service is not running' >&2
+    return 1
+  fi
+}
+
+run_rc_command "$1"
+RC_SCRIPT
+  else # linux
+    <<'INIT_SCRIPT'
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          automate-liveness-agent
@@ -157,15 +239,13 @@ stop() {
   echo 'Service stopped' >&2
 }
 
-uninstall() {
-  echo -n "Are you really sure you want to uninstall this service? That cannot be undone. [yes|No] "
-  local SURE
-  read SURE
-  if [ "$SURE" = "yes" ]; then
-    stop
-    rm -f "$PIDFILE"
-    update-rc.d -f automate-liveness-agent remove
-    rm -fv "$0"
+status() {
+  if [ -f $PIDFILE ] && kill -0 $(cat $PIDFILE); then
+    echo 'Service is running' >&2
+    return 0
+  else
+    echo 'Service is not running' >&2
+    return 1
   fi
 }
 
@@ -176,35 +256,35 @@ case "$1" in
   stop)
     stop
     ;;
-  uninstall)
-    uninstall
+  status)
+    status
     ;;
   restart)
     stop
     start
     ;;
   *)
-    echo "Usage: $0 {start|stop|restart|uninstall}"
+    echo "Usage: $0 {start|stop|restart|status}"
 esac
 INIT_SCRIPT
-
-  file init_script_path do
-    content(init_script)
-    mode 0755
-    owner 'root'
-    notifies :restart, 'service[automate-liveness-agent]'
   end
 
-  service 'automate-liveness-agent' do
-    supports(
-      start: true,
-      stop: true,
-      restart: true,
-      uninstall: true,
-      status: false,
-      reload: false
-    )
-    action [:enable, :start]
-  end
+file init_script_path do
+  content(init_script)
+  mode 0755
+  owner install_user
+  group install_group
+  notifies :restart, "service[#{agent_service_name}]"
+end
 
-end # not windows
+service agent_service_name do
+  supports(
+    start: true,
+    stop: true,
+    restart: true,
+    status: true,
+    uninstall: false,
+    reload: false
+  )
+  action [:enable, :start]
+end
