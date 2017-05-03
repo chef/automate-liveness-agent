@@ -43,7 +43,9 @@ platforms:
         # If you change it here you'll need to update the test cookbook.
         - ["private_network", {ip: "192.168.33.66"}]
   #
-  # supported platforms
+  # supported primary platforms
+  #
+  # debian
   #
   - name: debian-7.11
     provisioner:
@@ -67,6 +69,9 @@ platforms:
     verifier:
       attributes:
         org_name: debian87
+  #
+  # ubuntu
+  #
   - name: ubuntu-12.04
     attributes:
       liveness-agent-test:
@@ -147,6 +152,9 @@ platforms:
     verifier:
       attributes:
         org_name: ubuntu161012
+  #
+  # centos
+  #
   - name: centos-5.11
     attributes:
       liveness-agent-test:
@@ -207,6 +215,9 @@ platforms:
     verifier:
       attributes:
         org_name: centos7312
+  #
+  # amazon linux
+  #
   - name: amazon-linux
     driver:
       box: mvbcoding/awslinux
@@ -229,6 +240,9 @@ platforms:
     verifier:
       attributes:
         org_name: amazonlinux12
+  #
+  # windows
+  #
   - name: windows-2008-standard
     driver:
       box: chef/windows-server-2008r2-standard # private
@@ -258,6 +272,51 @@ platforms:
         windows: true
         sleep_seconds: 100
   #
+  # supported secondary platforms
+  #
+  # freebsd
+  #
+  - name: freebsd-10.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: freebsd103
+    verifier:
+      attributes:
+        org_name: freebsd103
+  - name: freebsd-10.3-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/freebsd-10.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: freebsd10312
+    verifier:
+      attributes:
+        org_name: freebsd10312
+  - name: freebsd-11.0
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: freebsd11
+    verifier:
+      attributes:
+        org_name: freebsd11
+  - name: freebsd-11.0-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: bento/freebsd-11.0
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: freebsd1112
+    verifier:
+      attributes:
+        org_name: freebsd1112
+  #
   # unsupported platforms
   #
   - name: fedora-24
@@ -284,53 +343,91 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: bento/oracle-7.3
-  - name: freebsd-10.3
-  - name: freebsd-10.3-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: bento/freebsd-10.3-12
-  - name: freebsd-11.0
-  - name: freebsd-11.0-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: bento/freebsd-11.0-12
   - name: opensuse-leap-42.2
   - name: opensuse-leap-42.2-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/opensuse-leap-42.2-12
-  #
-  # maybe working windows boxes
-  #
-  #- name: windows-2012r2
-  #  driver:
-  #    box: mwrock/Windows2012R2
-  #- name: windows-2016
-  #  driver:
-  #    box: mwrock/Windows2016
-  #- name: windows-nano
-  #  driver:
-  #    box: mwrock/WindowsNano
-  #- name: windows-8.1
-  #  driver:
-  #    box: mwrock/windows8.1-amd64
-  #
-  # proprietary boxes that must be built locally
+  - name: macos-10.9
+    driver:
+      box: chef/macosx-10.9
+  - name: macos-10.9-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/macosx-10.9
+  - name: macos-10.10
+    driver:
+      box: chef/macosx-10.10
+  - name: macos-10.10-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/macosx-10.10
+  - name: macos-10.11
+    driver:
+      box: chef/macosx-10.11
+  - name: macos-10.11-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/macosx-10.11
+  - name: macos-10.12
+    driver:
+      box: chef/macos-10.12
+  - name: macos-10.12-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/macos-10.12
+  - name: solaris-10.11
+    driver:
+      box: chef/solaris-10.11
+  - name: solaris-10.11-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/solaris-10.11
+  - name: solaris-11.3
+    driver:
+      box: chef/solaris-11.3
+  - name: solaris-11.3-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/solaris-11.3
+  - name: sles-11-sp2
+    driver:
+      box: chef/sles-11-sp2-x86_64
+  - name: sles-11-sp2-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/sles-11-sp2-x86_64
+  - name: sles-12
+    driver:
+      box: chef/sles-12-x86_64
+  - name: sles-12-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/sles-12-x86_64
+  - name: sles-12-sp1
+    driver:
+      box: chef/sles-12-sp1-x86_64
+  - name: sles-12-sp1-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/sles-12-sp1-x86_64
+
+  # platforms that are not being tested
   #
   #- name: rhel-5.11
   #- name: rhel-6.8
   #- name: rhel-7.11
-  #- name: sles-12
-  #- name: sles-12-sp1
-  #- name: sles-12-sp2
-  #- name: macosx-10.9
-  #- name: macosx-10.10
-  #- name: macosx-10.11
-  #- name: solaris-10.11
-  #- name: solaris-11
+  #- name: AIX?? lolz
 
 suites:
   - name: required
@@ -346,6 +443,7 @@ suites:
       inspec_tests:
         - test/integration/supported-platform
     includes:
+      # primary platforms
       - debian-7.11
       - debian-8.7
       - ubuntu-12.04-12
@@ -367,12 +465,17 @@ suites:
       - amazon-linux-12
       - windows-2008-standard
       - windows-2008-standard-12
+      # secondary platforms
+      - freebsd-10.3
+      - freebsd-10.3-12
+      - freebsd-11.0
+      - freebsd-11.0-12
   - name: unsupported
     run_list:
       - recipe[liveness-agent-test::test-client]
-    attributes:
+    verifier:
       inspec_tests:
-        - test/integration/supported-platform
+        - test/integration/unsupported-platform
     includes:
       - fedora-24
       - fedora-24-12
@@ -382,9 +485,23 @@ suites:
       - oracle-6.8-12
       - oracle-7.3
       - oracle-7.3-12
-      - freebsd-10.3
-      - freebsd-10.3-12
-      - freebsd-11.0
-      - freebsd-11.0-12
       - opensuse-leap-42.2
       - opensuse-leap-42.2-12
+      - macos-10.9
+      - macos-10.9-12
+      - macos-10.10
+      - macos-10.10-12
+      - macos-10.11
+      - macos-10.11-12
+      - macos-10.12
+      - macos-10.12-12
+      - solaris-10.11
+      - solaris-10.11-12
+      - solaris-11.3
+      - solaris-11.3-12
+      - sles-11-sp2
+      - sles-11-sp2-12
+      - sles-12
+      - sles-12-12
+      - sles-12-sp1
+      - sles-12-sp1-12
