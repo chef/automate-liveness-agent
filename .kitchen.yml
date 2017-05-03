@@ -245,7 +245,7 @@ platforms:
   #
   - name: windows-2008-standard
     driver:
-      box: chef/windows-server-2008r2-standard # private
+      box: chef/windows-server-2008r2-standard
     attributes:
       liveness-agent-test:
         automate:
@@ -260,7 +260,7 @@ platforms:
     provisioner:
       require_chef_omnibus: 12
     driver:
-      box: chef/windows-server-2008r2-standard # private
+      box: chef/windows-server-2008r2-standard
     attributes:
       liveness-agent-test:
         automate:
@@ -340,26 +340,71 @@ platforms:
       attributes:
         org_name: fedora2412
   #
-  # unsupported platforms
+  # oracle
   #
   - name: oracle-5.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle511
+    verifier:
+      attributes:
+        org_name: oracle511
   - name: oracle-5.11-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/oracle-5.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle51112
+    verifier:
+      attributes:
+        org_name: oracle51112
   - name: oracle-6.8
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle68
+    verifier:
+      attributes:
+        org_name: oracle68
   - name: oracle-6.8-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/oracle-6.8
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle6812
+    verifier:
+      attributes:
+        org_name: oracle6812
   - name: oracle-7.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle73
+    verifier:
+      attributes:
+        org_name: oracle73
   - name: oracle-7.3-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: bento/oracle-7.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: oracle7312
+    verifier:
+      attributes:
+        org_name: oracle7312
+  #
+  # unsupported platforms
+  #
   - name: opensuse-leap-42.2
   - name: opensuse-leap-42.2-12
     provisioner:
@@ -439,12 +484,12 @@ platforms:
     driver:
       box: chef/sles-12-sp1-x86_64
 
-  # platforms that are not being tested
-  #
-  #- name: rhel-5.11
-  #- name: rhel-6.8
-  #- name: rhel-7.11
-  #- name: AIX?? lolz
+# platforms that are not being tested
+#
+#  - name: rhel-5.11
+#  - name: rhel-6.8
+#  - name: rhel-7.11
+#  - name: AIX?? lolz
 
 suites:
   - name: required
@@ -489,6 +534,12 @@ suites:
       - freebsd-11.0-12
       - fedora-24
       - fedora-24-12
+      - oracle-5.11
+      - oracle-5.11-12
+      - oracle-6.8
+      - oracle-6.8-12
+      - oracle-7.3
+      - oracle-7.3-12
   - name: unsupported
     run_list:
       - recipe[liveness-agent-test::test-client]
@@ -496,12 +547,6 @@ suites:
       inspec_tests:
         - test/integration/unsupported-platform
     includes:
-      - oracle-5.11
-      - oracle-5.11-12
-      - oracle-6.8
-      - oracle-6.8-12
-      - oracle-7.3
-      - oracle-7.3-12
       - opensuse-leap-42.2
       - opensuse-leap-42.2-12
       - macos-10.9
