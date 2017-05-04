@@ -48,9 +48,6 @@ platforms:
   # debian
   #
   - name: debian-7.11
-    provisioner:
-      # chef-client 13 is currently broken on debian
-      require_chef_omnibus: 12
     attributes:
       liveness-agent-test:
         automate:
@@ -58,10 +55,17 @@ platforms:
     verifier:
       attributes:
         org_name: debian711
-  - name: debian-8.7
+  - name: debian-7.11-12
     provisioner:
-      # chef-client 13 is currently broken on debian
       require_chef_omnibus: 12
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: debian71112
+    verifier:
+      attributes:
+        org_name: debian71112
+  - name: debian-8.7
     attributes:
       liveness-agent-test:
         automate:
@@ -69,6 +73,16 @@ platforms:
     verifier:
       attributes:
         org_name: debian87
+  - name: debian-8.7-12
+    provisioner:
+      require_chef_omnibus: 12
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: debian8712
+    verifier:
+      attributes:
+        org_name: debian8712
   #
   # ubuntu
   #
@@ -299,7 +313,7 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-# need to verify these are the best boxes to use
+  # need to verify these are the best boxes to use
   - name: windows-2016-standard-13
     driver:
       box: mwrock/Windows2016
@@ -460,14 +474,83 @@ platforms:
       attributes:
         org_name: oracle7312
   #
-  # unsupported platforms
+  # suse
   #
-  - name: opensuse-leap-42.2
-  - name: opensuse-leap-42.2-12
+  # NOTE: Omnitruck is currently broken for SLES 11.x so the 11 tests will
+  # fail unless the EL-5 version of the package is installed manually before
+  # the verifications are run. This should be resolved soon:
+  # https://delivery.chef.co/e/chef/#/organizations/CIA/projects/omnitruck/changes/11898b2b-1de6-45bc-9207-e923bfec2e12/status/verify
+  #
+  - name: sles-11-sp2
+    provisioner:
+    driver:
+      box: chef/sles-11-sp2-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles11sp2
+    verifier:
+      attributes:
+        org_name: sles11sp2
+  - name: sles-11-sp2-12
     provisioner:
       require_chef_omnibus: 12
     driver:
-      box: bento/opensuse-leap-42.2-12
+      box: chef/sles-11-sp2-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles11sp212
+    verifier:
+      attributes:
+        org_name: sles11sp212
+  - name: sles-12
+    driver:
+      box: chef/sles-12-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles12
+    verifier:
+      attributes:
+        org_name: sles12
+  - name: sles-12-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/sles-12-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles1212
+    verifier:
+      attributes:
+        org_name: sles1212
+  - name: sles-12-sp1
+    driver:
+      box: chef/sles-12-sp1-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles12sp1
+    verifier:
+      attributes:
+        org_name: sles12sp1
+  - name: sles-12-sp1-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/sles-12-sp1-x86_64
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: sles12sp112
+    verifier:
+      attributes:
+        org_name: sles12sp112
+  #
+  # unsupported platforms
+  #
   - name: macos-10.9
     driver:
       box: chef/macosx-10.9
@@ -516,37 +599,13 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: chef/solaris-11.3
-  - name: sles-11-sp2
-    driver:
-      box: chef/sles-11-sp2-x86_64
-  - name: sles-11-sp2-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: chef/sles-11-sp2-x86_64
-  - name: sles-12
-    driver:
-      box: chef/sles-12-x86_64
-  - name: sles-12-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: chef/sles-12-x86_64
-  - name: sles-12-sp1
-    driver:
-      box: chef/sles-12-sp1-x86_64
-  - name: sles-12-sp1-12
-    provisioner:
-      require_chef_omnibus: 12
-    driver:
-      box: chef/sles-12-sp1-x86_64
 
-# platforms that are not being tested
-#
-#  - name: rhel-5.11
-#  - name: rhel-6.8
-#  - name: rhel-7.11
-#  - name: AIX?? lolz
+  # platforms that are not being tested
+  #
+  #  - name: rhel-5.11
+  #  - name: rhel-6.8
+  #  - name: rhel-7.11
+  #  - name: AIX?? lolz
 
 suites:
   - name: required
@@ -606,6 +665,12 @@ suites:
       - oracle-6.8-12
       - oracle-7.3
       - oracle-7.3-12
+      - sles-11-sp2
+      - sles-11-sp2-12
+      - sles-12
+      - sles-12-12
+      - sles-12-sp1
+      - sles-12-sp1-12
   - name: unsupported
     run_list:
       - recipe[liveness-agent-test::test-client]
@@ -613,8 +678,6 @@ suites:
       inspec_tests:
         - test/integration/unsupported-platform
     includes:
-      - opensuse-leap-42.2
-      - opensuse-leap-42.2-12
       - macos-10.9
       - macos-10.9-12
       - macos-10.10
@@ -627,11 +690,5 @@ suites:
       - solaris-10.11-12
       - solaris-11.3
       - solaris-11.3-12
-      - sles-11-sp2
-      - sles-11-sp2-12
-      - sles-12
-      - sles-12-12
-      - sles-12-sp1
-      - sles-12-sp1-12
       - windows-2016-standard-13
       - windows-2016-standard-12
