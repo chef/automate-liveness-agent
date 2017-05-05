@@ -18,6 +18,7 @@ return unless %w(
   debian
   fedora
   freebsd
+  mac_os_x
   oracle
   rhel
   suse
@@ -33,7 +34,6 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-run_interval      = 1 # only windows
 agent_dir         = Chef::Config.platform_specific_path('/var/opt/chef/')
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
@@ -42,26 +42,29 @@ agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-livenes
 agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
 agent_username    = 'chefautomate'
+run_interval      = 1 # only windows
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 
 agent_service_name = value_for_platform_family(
   %i(windows)                               => nil,
   %i(debian rhel amazon fedora oracle suse) => 'automate-liveness-agent',
-  %i(freebsd)                               => 'automate_liveness_agent'
+  %i(freebsd)                               => 'automate_liveness_agent',
+  %i(mac_os_x)                              => 'io.chef.automate.liveness.agent'
 )
-init_script_path = value_for_platform_family(
+agent_init_script_path = value_for_platform_family(
   %i(debian rhel amazon fedora oracle suse) => "/etc/init.d/#{agent_service_name}",
-  %i(freebsd)                               => "/etc/rc.d/#{agent_service_name}"
+  %i(freebsd)                               => "/etc/rc.d/#{agent_service_name}",
+  %i(mac_os_x)                              => "/Library/LaunchDaemons/#{agent_service_name}.plist"
 )
-install_user = value_for_platform_family(
-  %i(windows)                                        => 'administrator',
-  %i(debian rhel amazon freebsd fedora oracle suse ) => 'root'
+admin_user = value_for_platform_family(
+  %i(windows)                                                => 'administrator',
+  %i(debian rhel amazon freebsd fedora oracle suse mac_os_x) => 'root'
 )
-install_group = value_for_platform_family(
+admin_group = value_for_platform_family(
   %i(windows)                               => 'administrator',
   %i(debian rhel amazon fedora oracle suse) => 'root',
-  %i(freebsd)                               => 'wheel'
+  %i(freebsd mac_os_x)                      => 'wheel'
 )
 
 user agent_username do
@@ -82,34 +85,34 @@ end
 
 file agent_bin do
   mode 0755
-  owner install_user
-  group install_group
+  owner admin_user
+  group admin_group
   content liveness_agent
   notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
 end
 
 file agent_conf do
   mode 0755
-  owner install_user
-  group install_group
+  owner admin_user
+  group admin_group
   content(
     lazy do
       Chef::JSONCompat.to_json_pretty(
-        'chef_server_fqdn'   => server_uri.host,
-        'client_key_path'    => Chef::Config[:client_key],
-        'client_name'        => node.name,
-        'data_collector_url' => Chef::Config[:data_collector][:server_url],
-        'entity_uuid'        => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
-        'install_check_file' => Gem.ruby,
-        'org_name'           => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'   => platform?('windows') ? nil : Etc.getpwnam(agent_username).uid,
-        'unprivileged_gid'   => platform?('windows') ? nil : Etc.getpwnam(agent_username).gid,
-        'log_file'           => agent_log_file,
-        'ssl_verify_mode'    => Chef::Config[:ssl_verify_mode],
-        'ssl_ca_file'        => Chef::Config[:ssl_ca_file],
-        'ssl_ca_path'        => Chef::Config[:ssl_ca_path],
-        'trusted_certs_dir'  => trusted_certs_dir,
-        'scheduled_task_mode' => platform?('windows')
+        'chef_server_fqdn'    => server_uri.host,
+        'client_key_path'     => Chef::Config[:client_key],
+        'client_name'         => node.name,
+        'data_collector_url'  => Chef::Config[:data_collector][:server_url],
+        'entity_uuid'         => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
+        'install_check_file'  => Gem.ruby,
+        'org_name'            => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
+        'unprivileged_uid'    => platform?('windows') ? nil : Etc.getpwnam(agent_username).uid,
+        'unprivileged_gid'    => platform?('windows') ? nil : Etc.getpwnam(agent_username).gid,
+        'log_file'            => agent_log_file,
+        'ssl_verify_mode'     => Chef::Config[:ssl_verify_mode],
+        'ssl_ca_file'         => Chef::Config[:ssl_ca_file],
+        'ssl_ca_path'         => Chef::Config[:ssl_ca_path],
+        'trusted_certs_dir'   => trusted_certs_dir,
+        'scheduled_task_mode' => platform?('windows') || platform?('mac_os_x')
       )
     end
   )
@@ -126,8 +129,8 @@ if platform?('windows')
   # We hide configuration details in this script; it was too much to pass on the schtasks command line
   file scheduled_task_script do
     mode 0755
-    owner install_user
-    group install_group
+    owner admin_user
+    group admin_group
     content <<"SCRIPT_BODY"
 # powershell script to run the Chef automate liveness agent as a scheduled task\r\n
 $env:RUBYOPT = "--disable-gems"\r\n
@@ -149,7 +152,7 @@ EOH
   return
 end
 
-init_script =
+agent_init_script =
   if platform?('freebsd')
     <<'RC_SCRIPT'
 #!/bin/sh
@@ -214,6 +217,42 @@ check_automate_liveness_agent_status() {
 
 run_rc_command "$1"
 RC_SCRIPT
+  elsif platform?('mac_os_x')
+    <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>EnvironmentVariables</key>
+        <dict>
+                <key>RUBYOPT</key>
+                <string>--disable-gems</string>
+                <key>RUBY_GC_HEAP_GROWTH_MAX_SLOTS</key>
+                <string>500</string>
+        </dict>
+        <key>GroupName</key>
+        <string>wheel</string>
+        <key>KeepAlive</key>
+        <dict>
+	              <key>SuccessfulExit</key>
+	              <true/>
+        </dict>
+        <key>Label</key>
+        <string>io.chef.automate.liveness.agent</string>
+        <key>ProgramArguments</key>
+        <array>
+                <string>/var/opt/chef/bin/automate-liveness-agent</string>
+                <string>/var/opt/chef/etc/config.json</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>StartInterval</key>
+        <integer>1800</integer>
+        <key>UserName</key>
+        <string>root</string>
+</dict>
+</plist>
+PLIST
   else # linux
     <<'INIT_SCRIPT'
 #!/bin/sh
@@ -282,11 +321,11 @@ esac
 INIT_SCRIPT
   end
 
-file init_script_path do
-  content(init_script)
+file agent_init_script_path do
+  content(agent_init_script)
   mode 0755
-  owner install_user
-  group install_group
+  owner admin_user
+  group admin_group
   notifies :restart, "service[#{agent_service_name}]"
 end
 
@@ -299,5 +338,13 @@ service agent_service_name do
     uninstall: false,
     reload: false
   )
-  action [:enable, :start]
+  if platform?('mac_os_x')
+    # There's no need to "start" the service on MacOS. The liveness agent is
+    # configured in scheduled_task_mode and runs via launchd on a scheduled
+    # 30 minute interval. {start,restart,stop} are all supported but
+    # unnecessary.
+    action :enable
+  else
+    action %i(enable start)
+  end
 end
