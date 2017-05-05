@@ -20,6 +20,7 @@ return unless %w(
   freebsd
   oracle
   rhel
+  suse
   windows
 ).include?(node['platform_family'])
 
@@ -45,22 +46,22 @@ server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 
 agent_service_name = value_for_platform_family(
-  %i(windows)                          => nil,
-  %i(debian rhel amazon fedora oracle) => 'automate-liveness-agent',
-  %i(freebsd)                          => 'automate_liveness_agent'
+  %i(windows)                               => nil,
+  %i(debian rhel amazon fedora oracle suse) => 'automate-liveness-agent',
+  %i(freebsd)                               => 'automate_liveness_agent'
 )
 init_script_path = value_for_platform_family(
-  %i(debian rhel amazon fedora oracle) => "/etc/init.d/#{agent_service_name}",
-  %i(freebsd)                          => "/etc/rc.d/#{agent_service_name}"
+  %i(debian rhel amazon fedora oracle suse) => "/etc/init.d/#{agent_service_name}",
+  %i(freebsd)                               => "/etc/rc.d/#{agent_service_name}"
 )
 install_user = value_for_platform_family(
-  %i(windows)                                  => 'administrator',
-  %i(debian rhel amazon freebsd fedora oracle) => 'root'
+  %i(windows)                                        => 'administrator',
+  %i(debian rhel amazon freebsd fedora oracle suse ) => 'root'
 )
 install_group = value_for_platform_family(
-  %i(windows)                          => 'administrator',
-  %i(debian rhel amazon fedora oracle) => 'root',
-  %i(freebsd)                          => 'wheel'
+  %i(windows)                               => 'administrator',
+  %i(debian rhel amazon fedora oracle suse) => 'root',
+  %i(freebsd)                               => 'wheel'
 )
 
 user agent_username do
