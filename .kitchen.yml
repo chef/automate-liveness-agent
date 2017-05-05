@@ -287,7 +287,7 @@ platforms:
         sleep_seconds: 100
   - name: windows-2012-standard-13
     driver:
-      box: chef/windows-server-2012r2-standard # private
+      box: chef/windows-server-2012r2-standard
     attributes:
       liveness-agent-test:
         automate:
@@ -302,7 +302,7 @@ platforms:
     provisioner:
       require_chef_omnibus: 12
     driver:
-      box: chef/windows-server-2012r2-standard # private
+      box: chef/windows-server-2012r2-standard
     attributes:
       liveness-agent-test:
         automate:
@@ -482,7 +482,6 @@ platforms:
   # https://delivery.chef.co/e/chef/#/organizations/CIA/projects/omnitruck/changes/11898b2b-1de6-45bc-9207-e923bfec2e12/status/verify
   #
   - name: sles-11-sp2
-    provisioner:
     driver:
       box: chef/sles-11-sp2-x86_64
     attributes:
@@ -549,40 +548,123 @@ platforms:
       attributes:
         org_name: sles12sp112
   #
-  # unsupported platforms
+  # macos
   #
   - name: macos-10.9
     driver:
       box: chef/macosx-10.9
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos109
+    verifier:
+      attributes:
+        org_name: macos109
   - name: macos-10.9-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.9
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos10912
+    verifier:
+      attributes:
+        org_name: macos10912
   - name: macos-10.10
     driver:
       box: chef/macosx-10.10
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos1010
+    verifier:
+      attributes:
+        org_name: macos1010
   - name: macos-10.10-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.10
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos101012
+    verifier:
+      attributes:
+        org_name: macos101012
   - name: macos-10.11
     driver:
       box: chef/macosx-10.11
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos1011
+    verifier:
+      attributes:
+        org_name: macos1011
   - name: macos-10.11-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.11
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos101112
+    verifier:
+      attributes:
+        org_name: macos101112
   - name: macos-10.12
     driver:
       box: chef/macos-10.12
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos1012
+    verifier:
+      attributes:
+        org_name: macos1012
   - name: macos-10.12-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/macos-10.12
+      customize:
+        memory: 2048
+        cpus: 2
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: macos101212
+    verifier:
+      attributes:
+        org_name: macos101212
+  #
+  # unsupported platforms
+  #
   - name: solaris-10.11
     driver:
       box: chef/solaris-10.11
@@ -650,13 +732,6 @@ suites:
       - freebsd-10.3-12
       - freebsd-11.0
       - freebsd-11.0-12
-  - name: unsupported
-    run_list:
-      - recipe[liveness-agent-test::test-client]
-    attributes:
-      inspec_tests:
-        - test/integration/supported-platform
-    includes:
       - fedora-24
       - fedora-24-12
       - oracle-5.11
@@ -671,13 +746,6 @@ suites:
       - sles-12-12
       - sles-12-sp1
       - sles-12-sp1-12
-  - name: unsupported
-    run_list:
-      - recipe[liveness-agent-test::test-client]
-    verifier:
-      inspec_tests:
-        - test/integration/unsupported-platform
-    includes:
       - macos-10.9
       - macos-10.9-12
       - macos-10.10
@@ -686,6 +754,13 @@ suites:
       - macos-10.11-12
       - macos-10.12
       - macos-10.12-12
+  - name: unsupported
+    run_list:
+      - recipe[liveness-agent-test::test-client]
+    verifier:
+      inspec_tests:
+        - test/integration/unsupported-platform
+    includes:
       - solaris-10.11
       - solaris-10.11-12
       - solaris-11.3
