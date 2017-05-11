@@ -103,7 +103,7 @@ module AutomateLivenessAgent
     end
 
     def log_response(status, response)
-      log("HTTP Request finished (#{status}): #{response.code} #{response.message}")
+      log("HTTP Request to #{uri} finished (#{status}): #{response.code} #{response.message}")
       log("Response body: #{response.body}")
     end
 
