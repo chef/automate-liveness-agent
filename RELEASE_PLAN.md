@@ -24,7 +24,8 @@ kitchen test supported
 
 ##### Recipe Multi-Run Test
 
-Run this recipe at least 2x so we know it works continuously
+Run this recipe at least 2x so we know it works continuously. This is tested
+during the integration suite.
 
 ```
 kitchen test PLATFORM -d never
@@ -36,7 +37,7 @@ INTERVAL=2 chef-client -z -c /tmp/kitchen/test-client.rb -j /tmp/kitchen/test-at
 ##### Init Script Acceptance Test
 
 Test all the functions of the init script. Check the output of `ps` to
-verify.
+verify. These are all tested by the integration suite.
 
 * start, when stopped, starts it
 * start, when started, does not start another one
@@ -44,12 +45,12 @@ verify.
 * stop, when stopped, says service not running
 * restart, when stopped, starts it
 * restart, when running, stops the running one and starts a new one
-* uninstall
 
 ##### Logging Test
 
 Ensure the agent is correctly logging. The logfile should be owned by
-the non-root user we create for the agent.
+the non-root user we create for the agent. This is tested by the integration
+suite.
 
 ##### Chef Client Uninstall Detection
 

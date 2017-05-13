@@ -212,11 +212,11 @@ platforms:
   - name: centos-7.3
     attributes:
       liveness-agent-test:
-        org_name: centos73
-    verifier:
-      attributes:
         automate:
           org_name: centos73
+    verifier:
+      attributes:
+        org_name: centos73
   - name: centos-7.3-12
     provisioner:
       require_chef_omnibus: 12
@@ -550,29 +550,29 @@ platforms:
   #
   # macos
   #
-  - name: macos-10.9
-    driver:
-      box: chef/macosx-10.9
-      provider: wmware_fusion
-      customize:
-        memory: 2048
-        cpus: 2
-    attributes:
-      liveness-agent-test:
-        automate:
-          org_name: macos109
-    verifier:
-      attributes:
-        org_name: macos109
+  # macOS tests are a bit different from the rest of test matrix in that only
+  # macos 10.12 will use Virtualbox. Therefore, you must have VMware Fusion
+  # installed along with the vagrant vmware plugin.
+  #
+  # We have to specificy the chef-client version, otherwise the provisioner
+  # will detect the ancient chef-client versions baked into the images and
+  # will prefer to use those. Because we rely on the liveness agent being
+  # able to access the data_collector URL we have to use a newer client
+  # version.
+  #
+  # chef 13 is not supported on macos 10.9, as such it is not an included
+  # as a test platform.
+  #
   - name: macos-10.9-12
     provisioner:
-      require_chef_omnibus: 12
+      # the last chef 12 version to support macos 10.9
+      require_chef_omnibus: 12.18.31
     driver:
       box: chef/macosx-10.9
-      provider: wmware_fusion
+      provider: vmware_fusion
       customize:
-        memory: 2048
-        cpus: 2
+        memsize: 2048
+        numvcpus: 2
     attributes:
       liveness-agent-test:
         automate:
@@ -581,12 +581,15 @@ platforms:
       attributes:
         org_name: macos10912
   - name: macos-10.10
+    provisioner:
+      require_chef_omnibus: 13.0.118
     driver:
       box: chef/macosx-10.10
-      provider: wmware_fusion
+      provider: vmware_fusion
       customize:
-        memory: 2048
-        cpus: 2
+        memsize: 2048
+        numvcpus: 2
+        gui: false
     attributes:
       liveness-agent-test:
         automate:
@@ -596,13 +599,13 @@ platforms:
         org_name: macos1010
   - name: macos-10.10-12
     provisioner:
-      require_chef_omnibus: 12
+      require_chef_omnibus: 12.20.3
     driver:
       box: chef/macosx-10.10
-      provider: wmware_fusion
+      provider: vmware_fusion
       customize:
-        memory: 2048
-        cpus: 2
+        memsize: 2048
+        numvcpus: 2
     attributes:
       liveness-agent-test:
         automate:
@@ -611,12 +614,14 @@ platforms:
       attributes:
         org_name: macos101012
   - name: macos-10.11
+    provisioner:
+      require_chef_omnibus: 13.0.118
     driver:
       box: chef/macosx-10.11
-      provider: wmware_fusion
+      provider: vmware_fusion
       customize:
-        memory: 2048
-        cpus: 2
+        memsize: 2048
+        numvcpus: 2
     attributes:
       liveness-agent-test:
         automate:
@@ -626,13 +631,13 @@ platforms:
         org_name: macos1011
   - name: macos-10.11-12
     provisioner:
-      require_chef_omnibus: 12
+      require_chef_omnibus: 12.20.3
     driver:
       box: chef/macosx-10.11
-      provider: wmware_fusion
+      provider: vmware_fusion
       customize:
-        memory: 2048
-        cpus: 2
+        memsize: 2048
+        numvcpus: 2
     attributes:
       liveness-agent-test:
         automate:
@@ -640,10 +645,9 @@ platforms:
     verifier:
       attributes:
         org_name: macos101112
-  # NOTE: inspec seems to have issues connecting to 10.12. In the meantime
-  # you can manually run the chef-client converge on the test instance
-  # and verify the pings.
   - name: macos-10.12
+    provisioner:
+      require_chef_omnibus: 13.0.118
     driver:
       box: chef/macos-10.12
       customize:
@@ -658,7 +662,7 @@ platforms:
         org_name: macos1012
   - name: macos-10.12-12
     provisioner:
-      require_chef_omnibus: 12
+      require_chef_omnibus: 12.20.3
     driver:
       box: chef/macos-10.12
       customize:
@@ -671,6 +675,10 @@ platforms:
     verifier:
       attributes:
         org_name: macos101212
+
+  #
+  # solaris
+  #
   - name: solaris-10.11
     driver:
       box: chef/solaris-10.11
@@ -787,11 +795,10 @@ suites:
       - solaris-10.11-12
       - solaris-11.3
       - solaris-11.3-12
-  - name: unsupported
-    run_list:
-      - recipe[liveness-agent-test::test-client]
-    verifier:
-      inspec_tests:
-        - test/integration/unsupported-platform
-    includes:
-
+# - name: unsupported
+#   run_list:
+#     - recipe[liveness-agent-test::test-client]
+#   verifier:
+#     inspec_tests:
+#       - test/integration/unsupported-platform
+#   includes:
