@@ -794,8 +794,4 @@ suites:
       inspec_tests:
         - test/integration/unsupported-platform
     includes:
-      - solaris-10.11
-      - solaris-10.11-12
-      - solaris-11.3
-      - solaris-11.3-12
 
