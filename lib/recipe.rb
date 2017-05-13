@@ -28,12 +28,8 @@ return unless %w(
   windows
 ).include?(node['platform_family'])
 
-# windows 10 and greater not supported yet; improve this somehow
-return if platform?('windows') && node['platform_version'] =~ /^1[0-9]\./
-
 # only support solaris 10 and 11
 return if platform?('solaris2') && node['platform_version'] !~ /^5.(10|11)$/
-
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
@@ -107,7 +103,7 @@ admin_group = value_for_platform_family(
     mac_os_x
   )            => 'wheel',
   %i(solaris2) => 'sys',
-  %i(windows)  => 'administrator'
+  %i(windows)  => 'Administrators'
 )
 agent_user_shell = value_for_platform_family(
   %i(
@@ -201,7 +197,7 @@ SCRIPT_BODY
   powershell_script 'Setup scheduled task' do
     # If we are running powershell > 3, there's a nice API to do this, but 2008r2 doesn't provide that
     code <<-EOH
-schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /tr "powershell.exe -windowstyle hidden #{scheduled_task_script}"
+schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /ru SYSTEM /rl HIGHEST /tr "powershell.exe -windowstyle hidden #{scheduled_task_script}"
 EOH
   end
 

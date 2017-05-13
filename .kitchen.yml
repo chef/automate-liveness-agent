@@ -281,7 +281,7 @@ platforms:
           org_name: windows2008r2c12
     verifier:
       attributes:
-        org_name: windows2008r2
+        org_name: windows2008r2c12
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -309,7 +309,7 @@ platforms:
           org_name: windows2012r2c12
     verifier:
       attributes:
-        org_name: windows2012r2
+        org_name: windows2012r2c12
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -338,7 +338,7 @@ platforms:
           org_name: windows2016c12
     verifier:
       attributes:
-        org_name: windows2016
+        org_name: windows2016c12
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -750,10 +750,12 @@ suites:
       - centos-7.3-12
       - amazon-linux
       - amazon-linux-12
-      - windows-2008-standard-13
       - windows-2008-standard-12
-      - windows-2012-standard-13
+      - windows-2008-standard-13
       - windows-2012-standard-12
+      - windows-2012-standard-13
+      - windows-2016-standard-12
+      - windows-2016-standard-13
       # secondary platforms
       - freebsd-10.3
       - freebsd-10.3-12
@@ -792,5 +794,4 @@ suites:
       inspec_tests:
         - test/integration/unsupported-platform
     includes:
-      - windows-2016-standard-13
-      - windows-2016-standard-12
+
