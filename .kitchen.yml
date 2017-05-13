@@ -10,7 +10,7 @@ provisioner:
 verifier:
   name: inspec
   attributes:
-    # The 'http' inspec resource current executes on the host machine.
+    # The 'http' inspec resource currently executes on the host machine.
     # As we rely on it to verify that the liveness agent is updating the
     # faux Chef Automate we'll forward the port and execute the http
     # requests against localhost.
@@ -34,7 +34,7 @@ platforms:
       box: bento/ubuntu-16.04
       vm_hostname: fauxautomate
       network:
-        # The 'http' inspec resource current executes on the host machine.
+        # The 'http' inspec resource currently executes on the host machine.
         # As we rely on it to verify that the liveness agent is updating the
         # faux Chef Automate we'll forward the port and execute the http
         # requests against localhost.
@@ -553,6 +553,7 @@ platforms:
   - name: macos-10.9
     driver:
       box: chef/macosx-10.9
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -568,6 +569,7 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.9
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -581,6 +583,7 @@ platforms:
   - name: macos-10.10
     driver:
       box: chef/macosx-10.10
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -596,6 +599,7 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.10
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -609,6 +613,7 @@ platforms:
   - name: macos-10.11
     driver:
       box: chef/macosx-10.11
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -624,6 +629,7 @@ platforms:
       require_chef_omnibus: 12
     driver:
       box: chef/macosx-10.11
+      provider: wmware_fusion
       customize:
         memory: 2048
         cpus: 2
@@ -634,6 +640,9 @@ platforms:
     verifier:
       attributes:
         org_name: macos101112
+  # NOTE: inspec seems to have issues connecting to 10.12. In the meantime
+  # you can manually run the chef-client converge on the test instance
+  # and verify the pings.
   - name: macos-10.12
     driver:
       box: chef/macos-10.12
@@ -662,32 +671,50 @@ platforms:
     verifier:
       attributes:
         org_name: macos101212
-  #
-  # unsupported platforms
-  #
   - name: solaris-10.11
     driver:
       box: chef/solaris-10.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: solaris1011
+    verifier:
+      attributes:
+        org_name: solaris1011
   - name: solaris-10.11-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/solaris-10.11
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: solaris101112
+    verifier:
+      attributes:
+        org_name: solaris101112
   - name: solaris-11.3
     driver:
       box: chef/solaris-11.3
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: solaris113
+    verifier:
+      attributes:
+        org_name: solaris113
   - name: solaris-11.3-12
     provisioner:
       require_chef_omnibus: 12
     driver:
       box: chef/solaris-11.3
-
-  # platforms that are not being tested
-  #
-  #  - name: rhel-5.11
-  #  - name: rhel-6.8
-  #  - name: rhel-7.11
-  #  - name: AIX?? lolz
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: solaris11312
+    verifier:
+      attributes:
+        org_name: solaris11312
 
 suites:
   - name: required
@@ -754,6 +781,10 @@ suites:
       - macos-10.11-12
       - macos-10.12
       - macos-10.12-12
+      - solaris-10.11
+      - solaris-10.11-12
+      - solaris-11.3
+      - solaris-11.3-12
   - name: unsupported
     run_list:
       - recipe[liveness-agent-test::test-client]
@@ -761,9 +792,5 @@ suites:
       inspec_tests:
         - test/integration/unsupported-platform
     includes:
-      - solaris-10.11
-      - solaris-10.11-12
-      - solaris-11.3
-      - solaris-11.3-12
       - windows-2016-standard-13
       - windows-2016-standard-12
