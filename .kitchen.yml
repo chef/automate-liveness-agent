@@ -342,6 +342,34 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
+  - name: windows-8-1-standard-13
+    driver:
+      box: chef/windows-8.1-enterprise
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows8-1
+    verifier:
+      attributes:
+        org_name: windows8-1
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
+  - name: windows-8-1-standard-12
+    provisioner:
+      require_chef_omnibus: 12
+    driver:
+      box: chef/windows-8.1-enterprise
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: windows8-1c12
+    verifier:
+      attributes:
+        org_name: windows8-1c12
+        kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
+        windows: true
+        sleep_seconds: 100
   #
   # supported secondary platforms
   #
@@ -783,6 +811,8 @@ suites:
       - sles-12-12
       - sles-12-sp1
       - sles-12-sp1-12
+      - windows-8-1-standard-12
+      - windows-8-1-standard-13
       - macos-10.9
       - macos-10.9-12
       - macos-10.10
