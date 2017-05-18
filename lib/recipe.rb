@@ -16,6 +16,7 @@
 
 # exit early if we're running on an unsupported platform
 return unless %w(
+  aix
   amazon
   debian
   fedora
@@ -30,17 +31,16 @@ return unless %w(
 
 # only support solaris 10 and 11
 return if platform?('solaris2') && node['platform_version'] !~ /^5.(10|11)$/
+
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-agent_dir         = Chef::Config.platform_specific_path(
-  platform?('windows') ? 'c:/chef' : '/var/opt/chef/')
+agent_dir         = platform?('windows') ? 'c:/chef' : '/var/opt/chef/'
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
-agent_log_dir     = Chef::Config.platform_specific_path(
-  platform?('windows') ? 'c:/chef/log' : '/var/log/chef')
+agent_log_dir     = platform?('windows') ? 'c:/chef/log/automate-liveness-agent' : '/var/log/chef/automate-liveness-agent'
 agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
 agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
@@ -48,6 +48,9 @@ agent_username    = 'chefautomate'
 run_interval      = 1 # only windows
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
+unprivileged_uid  = platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).uid
+unprivileged_gid  = platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).gid
+daemon_mode       = platform?('windows') || platform?('aix') ? false : true
 
 agent_service_name = value_for_platform_family(
   %i(
@@ -59,11 +62,15 @@ agent_service_name = value_for_platform_family(
     suse
   )            => 'automate-liveness-agent',
   %i(mac_os_x) => 'io.chef.automate.liveness.agent',
-  %i(freebsd)  => 'automate_liveness_agent',
+  %i(
+    freebsd
+    aix
+  )            => 'automate_liveness_agent',
   %i(solaris2) => 'automatelivenessagent',
   %i(windows)  => nil
 )
 agent_init_script_path = value_for_platform_family(
+  %i(aix)      => "/etc/rc.d/rc2.d/S999#{agent_service_name}",
   %i(
     amazon
     debian
@@ -79,6 +86,7 @@ agent_init_script_path = value_for_platform_family(
 )
 admin_user = value_for_platform_family(
   %i(
+    aix
     amazon
     debian
     fedora
@@ -92,6 +100,7 @@ admin_user = value_for_platform_family(
   %i(windows) => 'administrator'
 )
 admin_group = value_for_platform_family(
+  %i(aix)      => 'system',
   %i(
     debian
     rhel
@@ -108,6 +117,7 @@ admin_group = value_for_platform_family(
   %i(windows)  => 'Administrators'
 )
 agent_user_shell = value_for_platform_family(
+  %i(aix)      => '/bin/ksh',
   %i(
     amazon
     debian
@@ -156,12 +166,13 @@ file agent_conf do
         'chef_server_fqdn'    => server_uri.host,
         'client_key_path'     => Chef::Config[:client_key],
         'client_name'         => node.name,
+        'daemon_mode'					=> daemon_mode,
         'data_collector_url'  => Chef::Config[:data_collector][:server_url],
         'entity_uuid'         => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file'  => Gem.ruby,
         'org_name'            => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'    => platform?('windows') ? nil : Etc.getpwnam(agent_username).uid,
-        'unprivileged_gid'    => platform?('windows') ? nil : Etc.getpwnam(agent_username).gid,
+        'unprivileged_uid'    => unprivileged_uid,
+        'unprivileged_gid'    => unprivileged_gid,
         'log_file'            => agent_log_file,
         'ssl_verify_mode'     => Chef::Config[:ssl_verify_mode],
         'ssl_ca_file'         => Chef::Config[:ssl_ca_file],
@@ -353,6 +364,26 @@ case "$1" in
     echo "Usage: $0 {start|stop|restart}"
 esac
 INIT_SCRIPT
+  elsif platform?('aix')
+    <<'RC_SCRIPT'
+#!/bin/ksh
+
+case "$1" in
+start )
+        startsrc -s automate_liveness_agent -e "RUBYOPT='--disable-gems' RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500"
+        ;;
+stop )
+        stopsrc -s automate_liveness_agent
+        ;;
+restart )
+        stopsrc -s automate_liveness_agent
+        startsrc -s automate_liveness_agent -e "RUBYOPT='--disable-gems' RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500"
+        ;;
+* )
+        echo "Usage: $0 (start | stop | restart)"
+        exit 1
+esac
+RC_SCRIPT
   else # linux
     <<'INIT_SCRIPT'
 #!/bin/sh
@@ -427,6 +458,26 @@ file agent_init_script_path do
   owner admin_user
   group admin_group
   notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
+end
+
+if platform?('aix')
+  directory '/var/run' do
+    recursive true
+  end
+
+  link "/etc/rc.d/rc2.d/K999#{agent_service_name}" do
+    to agent_init_script_path
+    owner admin_user
+    group admin_group
+  end
+
+  bash 'create-automate-service' do
+    code <<"SCRIPT"
+mkssys -s automate_liveness_agent -u 0 -p /var/opt/chef/bin/automate-liveness-agent -S -n 15 -f 9 -a '/var/opt/chef/etc/config.json'
+SCRIPT
+
+    not_if 'lssrc -s automate_liveness_agent'
+  end
 end
 
 if platform?('solaris2')
@@ -527,6 +578,9 @@ service agent_service_name do
     # 30 minute interval. {start,restart,stop} are all supported but
     # unnecessary.
     action :enable
+  elsif platform?('aix')
+    # AIX doesn't support enabling services so we'll just start it
+    action :start
   else
     action %i(enable start)
   end

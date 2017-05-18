@@ -35,6 +35,7 @@ module AutomateLivenessAgent
     attr_reader :client_key_path
     attr_reader :client_key
     attr_reader :client_name
+    attr_reader :daemon_mode
     attr_reader :data_collector_url
     attr_reader :entity_uuid
     attr_reader :org_name
@@ -64,6 +65,7 @@ module AutomateLivenessAgent
       @client_key           = nil
       @client_key_path      = nil
       @client_name          = nil
+      @daemon_mode          = nil
       @data_collector_url   = nil
       @entity_uuid          = nil
       @org_name             = nil
@@ -143,6 +145,10 @@ module AutomateLivenessAgent
         sanity_check_trusted_certs_dir(config_data["trusted_certs_dir"])
       end
 
+      if config_data.key?("daemon_mode")
+        sanity_check_daemon_mode(config_data["daemon_mode"])
+      end
+
       @install_check_file   = config_data["install_check_file"]
       @log_file             = config_data["log_file"]
       @scheduled_task_mode  = config_data["scheduled_task_mode"]
@@ -207,6 +213,10 @@ module AutomateLivenessAgent
       if File.size(config_path) == 0
         raise ConfigError, "Config file '#{config_path}' is empty"
       end
+    end
+
+    def sanity_check_daemon_mode(mode)
+      @daemon_mode = mode.is_a?(TrueClass) || mode == "true" ? true : false
     end
 
     def validate_and_normalize_log_path(log_path)
