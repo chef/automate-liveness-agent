@@ -122,7 +122,7 @@ module AutomateLivenessAgent
       if config.scheduled_task_mode
         a.update
       else
-        Process.daemon
+        Process.daemon if config.daemon_mode
         if @pidfile_handle
          @pidfile_handle.write(Process.pid)
          @pidfile_handle.close
