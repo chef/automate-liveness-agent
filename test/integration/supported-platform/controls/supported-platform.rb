@@ -10,7 +10,7 @@ client_rb     = File.join(kitchen_dir, "test-client.rb")
 client_attrs  = File.join(kitchen_dir, "test-attrs.json")
 sleep_seconds = attribute("sleep_seconds", default: "10")
 sleep_cmd     = "sleep #{sleep_seconds}"
-log_file_path = "/var/log/chef/automate-liveness-agent.log"
+log_file_path = "/var/log/chef/automate-liveness-agent/automate-liveness-agent.log"
 client_cmd    =
   if windows
     "chef-client -z -c #{client_rb} -j #{client_attrs}"
