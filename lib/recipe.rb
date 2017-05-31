@@ -48,8 +48,6 @@ agent_username    = 'chefautomate'
 run_interval      = 1 # only windows
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
-unprivileged_uid  = platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).uid
-unprivileged_gid  = platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).gid
 daemon_mode       = platform?('windows') || platform?('aix') ? false : true
 
 agent_service_name = value_for_platform_family(
@@ -171,8 +169,8 @@ file agent_conf do
         'entity_uuid'         => Chef::JSONCompat.parse(Chef::FileCache.load('data_collector_metadata.json'))['node_uuid'],
         'install_check_file'  => Gem.ruby,
         'org_name'            => Chef::Config[:data_collector][:organization] || server_uri.path.split('/').last,
-        'unprivileged_uid'    => unprivileged_uid,
-        'unprivileged_gid'    => unprivileged_gid,
+        'unprivileged_uid'    => platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).uid,
+        'unprivileged_gid'    => platform?('windows') || platform?('aix') ? nil : Etc.getpwnam(agent_username).gid,
         'log_file'            => agent_log_file,
         'ssl_verify_mode'     => Chef::Config[:ssl_verify_mode],
         'ssl_ca_file'         => Chef::Config[:ssl_ca_file],
