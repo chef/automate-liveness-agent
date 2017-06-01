@@ -13,7 +13,7 @@ sleep_cmd     = "sleep #{sleep_seconds}"
 log_file_path = "/var/log/chef/automate-liveness-agent/automate-liveness-agent.log"
 client_cmd    =
   if windows
-    "chef-client -z -c #{client_rb} -j #{client_attrs}"
+    "$env:CHEF_RUN_INTERVAL=1 ; chef-client -z -c #{client_rb} -j #{client_attrs}"
   else
     "INTERVAL=2 chef-client -z -c #{client_rb} -j #{client_attrs}"
   end
