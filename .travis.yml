@@ -12,3 +12,11 @@ env:
 branches:
   only:
     - master
+
+matrix:
+  exclude:
+    # Only execute the linting checks once
+    - rvm: 2.3.3
+      env: CHEFSTYLE=true
+    - rvm: 2.3.3
+      env: COOKSTYLE=true
