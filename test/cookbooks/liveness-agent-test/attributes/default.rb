@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 default['liveness-agent-test']['automate'].tap do |automate|
   automate['root_dir'] = '/var/opt/delivery'
   automate['gemfile'] = '/var/opt/delivery/Gemfile'

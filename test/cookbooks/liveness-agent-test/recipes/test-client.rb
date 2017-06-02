@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 kitchen_root = platform_family?('windows') ? :: File.join(ENV['TEMP'], 'kitchen') : '/tmp/kitchen'
 host         = node['liveness-agent-test']['automate']['host']
 port         = node['liveness-agent-test']['automate']['port']

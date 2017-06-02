@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 name 'liveness-agent-test'
 maintainer 'Ryan Cragun'
 maintainer_email 'me@ryan.ec'
