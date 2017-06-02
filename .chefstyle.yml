@@ -1,0 +1,12 @@
+---
+AllCops:
+  DisplayCopNames: true
+  Exclude:
+    - 'bin/*'
+    - 'lib/recipe.rb'
+    - 'lib/automate_liveness_agent/vendor/**/**'
+    - 'spec/examples.txt'
+    - 'build/*'
+    - 'test/cookbooks/**/*'
+  Include:
+    - 'test/cookbooks/liveness-agent-test/files/default/automate/app.rb'

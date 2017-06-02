@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "compile_to_file"
 
 desc "Compile the application to a single file for deployment"
