@@ -41,7 +41,7 @@ module CompileToFile
       File.open(output_file, "w+") do |compiled|
 
         compiled << shebang
-        compiled << "# Compiled at #{Time.now}\n"
+        compiled << "# Compiled at #{Time.now}\n" if ENV['DEBUG']
 
         @files.each do |source_file|
           compiled << source_file.processed_source
