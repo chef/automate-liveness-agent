@@ -238,7 +238,7 @@ if platform?('windows')
     Chef::Log.debug("Task hash #{task_hash}")
     Chef::Log.debug("Options hash #{options}")
 
-    return unless task_hash
+    return false unless task_hash
 
     return false if task_hash[:TaskToRun] != options['TR']
     return false if task_hash[:RunAsUser] != options['RU']
