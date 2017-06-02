@@ -42,7 +42,7 @@ agent_dir         = Chef::Config.platform_specific_path(
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
 agent_log_dir     = Chef::Config.platform_specific_path(
-  platform?('windows') ? 'c:/chef/log' : '/var/log/chef')
+  platform?('windows') ? 'c:/chef/log/automate-liveness-agent' : '/var/log/chef/automate-liveness-agent')
 agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
 agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
