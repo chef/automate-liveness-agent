@@ -37,10 +37,12 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!('#!/usr/bin/env ruby', "#!#{Gem.ruby}")
 
-agent_dir         = platform?('windows') ? 'c:/chef' : '/var/opt/chef/'
+agent_dir         = Chef::Config.platform_specific_path(
+  platform?('windows') ? 'c:/chef' : '/var/opt/chef/')
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, 'bin')
 agent_etc_dir     = ChefConfig::PathHelper.join(agent_dir, 'etc')
-agent_log_dir     = platform?('windows') ? 'c:/chef/log/automate-liveness-agent' : '/var/log/chef/automate-liveness-agent'
+agent_log_dir     = Chef::Config.platform_specific_path(
+  platform?('windows') ? 'c:/chef/log' : '/var/log/chef')
 agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-liveness-agent.log')
 agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
@@ -130,9 +132,11 @@ agent_user_shell = value_for_platform_family(
   %i(windows)  => nil
 )
 
+# The windows_user resource isn't idempotent
 user agent_username do
   home agent_dir
   shell agent_user_shell
+  not_if { platform?('windows') }
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|
@@ -142,7 +146,7 @@ end
 end
 
 directory agent_log_dir do
-  owner agent_username
+  owner platform?('windows') ? admin_user : agent_username
   recursive true
 end
 
@@ -184,13 +188,114 @@ file agent_conf do
   notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
 end
 
+#
+# Windows platform
+#
 if platform?('windows')
-
   # In windows we run things as as a scheduled task instead of a daemon
   # This avoids the code overhead of a service, and isn't too inefficient since we run infrequently
+  # However this ends up essentially vendoring parts of the windows cookbook.
+  # https://github.com/chef-cookbooks/windows/blob/master/resources/task.rb
+  #
+  task_name = 'Chef Automate Liveness Agent'
   scheduled_task_script = ChefConfig::PathHelper.join(agent_bin_dir, 'automate_liveness_agent_task.ps1')
 
-  # We hide configuration details in this script; it was too much to pass on the schtasks command line
+  def load_task_hash(task_name)
+    Chef::Log.info "Looking for existing task #{task_name}"
+
+    # we use powershell_out here instead of powershell_out! because a
+    # failure implies that the task does not exist
+    #
+    # We don't get all the data we might want in this format, we might want to look at the
+    # XML form: schtasks /Query /XML /V
+    task_script = <<-EOH
+    [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8
+    schtasks /Query /FO LIST /V /TN \"#{task_name}\"
+  EOH
+
+    output = powershell_out(task_script).stdout.force_encoding('UTF-8')
+    if output.empty?
+      task = false
+    else
+      task = {}
+
+      output.split("\n").map! { |line| line.split(':', 2).map!(&:strip) }.each do |field|
+        if field.is_a?(Array) && field[0].respond_to?(:to_sym)
+          task[field[0].gsub(/\s+/, '').to_sym] = field[1]
+        end
+      end
+    end
+
+    task
+  end
+
+  def compare_current_value(task_name, options)
+    pathed_task_name = task_name.start_with?('\\') ? task_name : "\\#{task_name}"
+
+    task_hash = load_task_hash pathed_task_name
+
+    Chef::Log.debug("Task hash #{task_hash}")
+    Chef::Log.debug("Options hash #{options}")
+
+    return false if !task_hash
+
+    return false if task_hash[:TaskToRun] != options['TR']
+    return false if task_hash[:RunAsUser] != options['RU']
+
+    # TODO
+    #
+    # Apparently /RL isn't reported, and SC and MO (interval values)
+    # aren't reported in a readable fashion
+    #
+    # Need check interval somehow; possibly by diffing :NextRunTime and
+    # :LastRunTime ("5/19/2017 3:52:00 AM") Use :ScheduleType to find
+    # units ("One Time Only, Minute")
+    return true;
+  end
+
+  def make_command(task_action, options)
+    cmd = "schtasks /#{task_action} "
+    opts = options.keys.map do |option|
+      opt = "/#{option} "
+      opt += "\"#{options[option].to_s.gsub('"', "\\\"")}\" " unless options[option] == ''
+      opt
+    end.join('')
+
+    cmd + opts
+  end
+
+  def run_schtasks(task_action, options = {})
+    cmd = make_command(task_action, options)
+
+    Chef::Log.info('running: ')
+    Chef::Log.info("    #{cmd}")
+    cmd = Mixlib::ShellOut.new(cmd, returns: [0])
+    cmd.run_command
+    cmd.error!
+  end
+
+  # If these options are changed, check compare_current_value to make
+  # sure changes are detected
+  def build_task_options(task_name, run_interval, scheduled_task_script)
+    {
+      'F' => '',
+      'SC' => 'minute',
+      'MO' => run_interval.to_s,
+      'TN' => task_name,
+      'RU' => 'SYSTEM',
+      'RL' => 'HIGHEST',
+      # use great care around excess white space; windows can eat this and then
+      # we will allways detect difference and redeploy
+      'TR' => "powershell.exe -windowstyle hidden #{scheduled_task_script}"
+    }
+  end
+  #
+  # Do the actual setup
+  #
+
+  #
+  # We hide configuration details in this script; it was too much to
+  # pass on the schtasks command line
   file scheduled_task_script do
     mode 0755
     owner admin_user
@@ -204,17 +309,23 @@ SCRIPT_BODY
     # debugging add Get-Date -Format g | Out-File c:\\chef\\script.log\r\n to script above
   end
 
-  # Set up scheduled task; this is idempotent because scheduled tasks replace ones with same name
+  options = build_task_options(task_name, run_interval, scheduled_task_script)
+  is_task_setup = compare_current_value(task_name, options)
+
+  cmd = make_command 'CREATE', options
+
+  Chef::Log.info("Task is setup already, skipping") if is_task_setup
+
   powershell_script 'Setup scheduled task' do
-    # If we are running powershell > 3, there's a nice API to do this, but 2008r2 doesn't provide that
-    code <<-EOH
-schtasks /create /f /sc minute /mo #{run_interval} /tn "Chef Liveness Agent" /ru SYSTEM /rl HIGHEST /tr "powershell.exe -windowstyle hidden #{scheduled_task_script}"
-EOH
+    code cmd
+    not_if { is_task_setup }
   end
 
-  # with windows we exit after we start the scheduled task
-  return
-end
+else # Not windows
+
+#
+# All other platforms (not windows)
+#
 
 agent_init_script =
   if platform?('freebsd')
@@ -582,4 +693,6 @@ service agent_service_name do
   else
     action %i(enable start)
   end
+end
+
 end
