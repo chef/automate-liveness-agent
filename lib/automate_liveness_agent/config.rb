@@ -160,7 +160,7 @@ module AutomateLivenessAgent
     private
 
     def sanity_check_ssl_verify_mode(verify_mode)
-      if verify_mode.match?(/^verify_(peer|none)$/)
+      if verify_mode =~ /^verify_(peer|none)$/
         @ssl_verify_mode = verify_mode
       else
         raise(
