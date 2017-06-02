@@ -6,6 +6,8 @@ rvm:
 env:
   -
   - TEST_BUILD_ARTIFACT=1
+  - CHEFSTYLE=true
+  - COOKSTYLE=true
 
 branches:
   only:
