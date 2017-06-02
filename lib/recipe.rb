@@ -47,7 +47,7 @@ agent_log_file    = ChefConfig::PathHelper.join(agent_log_dir, 'automate-livenes
 agent_bin         = ChefConfig::PathHelper.join(agent_bin_dir, 'automate-liveness-agent')
 agent_conf        = ChefConfig::PathHelper.join(agent_etc_dir, 'config.json')
 agent_username    = 'chefautomate'
-run_interval      = 1 # only windows
+run_interval      = ENV['CHEF_RUN_INTERVAL'] || 30 # (only windows), to ease testing
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 daemon_mode       = platform?('windows') || platform?('aix') ? false : true
@@ -277,6 +277,15 @@ if platform?('windows')
   # If these options are changed, check compare_current_value to make
   # sure changes are detected
   def build_task_options(task_name, run_interval, scheduled_task_script)
+    # we must be very careful around excess whitespace windows can eat this and then
+    # we will always detect difference and redeploy
+
+    # Run interval doesn't actually affect the command, but is
+    # included to aid in change detection since we can't parse the
+    # interval out of the running command. If we wanted to get fancy, we could hash all of
+    # of the options, but the run interval is the only one we really need to do.
+    command = "powershell.exe -windowstyle hidden #{scheduled_task_script} #{run_interval}"
+    command = command.strip.gsub(/\s+/, ' ')
     {
       'F' => '',
       'SC' => 'minute',
@@ -284,9 +293,7 @@ if platform?('windows')
       'TN' => task_name,
       'RU' => 'SYSTEM',
       'RL' => 'HIGHEST',
-      # use great care around excess white space; windows can eat this and then
-      # we will allways detect difference and redeploy
-      'TR' => "powershell.exe -windowstyle hidden #{scheduled_task_script}"
+      'TR' => command
     }
   end
   #
@@ -316,7 +323,7 @@ SCRIPT_BODY
 
   Chef::Log.info("Task is setup already, skipping") if is_task_setup
 
-  powershell_script 'Setup scheduled task' do
+  powershell_script "Setup scheduled task at #{run_interval} minutes" do
     code cmd
     not_if { is_task_setup }
   end
