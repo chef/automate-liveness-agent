@@ -1,3 +1,4 @@
+# frozen_string_literal: false
 RSpec.describe AutomateLivenessAgent::APIClient do
 
   let(:config_path) { "/dummy/path/to/config.json" }

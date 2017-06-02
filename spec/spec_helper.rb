@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # In order to run the tests against the build artifact (which is made with
 # `rake compile` and output to `build/automate-liveness-agent`), we have to
 # load that instead of the stuff in `lib/`. Which means that the individual
@@ -83,8 +84,6 @@ module AutomateLivenessAgent
   end
 end
 
-
-
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
@@ -150,7 +149,7 @@ RSpec.configure do |config|
     # Use the documentation formatter for detailed output,
     # unless a formatter has already been configured
     # (e.g. via a command-line flag).
-    config.default_formatter = 'doc'
+    config.default_formatter = "doc"
   end
 
   # Print the 10 slowest examples and example groups at the
@@ -173,4 +172,3 @@ RSpec.configure do |config|
   config.include AutomateLivenessAgent::TestHelpers
   config.extend AutomateLivenessAgent::TestHelpers
 end
-

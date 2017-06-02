@@ -1,3 +1,4 @@
+# frozen_string_literal: false
 RSpec.describe AutomateLivenessAgent::Config do
 
   BASE_CONFIG_DATA =
@@ -125,7 +126,7 @@ RSpec.describe AutomateLivenessAgent::Config do
 
         let(:expected_message) do
           "Config file '#{config_path}' is missing mandatory setting(s): " <<
-            BASE_CONFIG_DATA.keys.map { |k| "\"#{k}\"" }.join(',')
+            BASE_CONFIG_DATA.keys.map { |k| "\"#{k}\"" }.join(",")
         end
 
         it "raises a ConfigError" do

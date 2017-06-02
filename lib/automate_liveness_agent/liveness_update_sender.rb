@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "automate_liveness_agent/api_client"
 require "time"
 

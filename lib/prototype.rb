@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # TODO: remove this code or replace with something more useful after the
 # prototyping phase is done.
 #

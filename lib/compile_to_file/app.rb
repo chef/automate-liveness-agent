@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "fileutils"
 
 module CompileToFile
@@ -53,4 +54,3 @@ module CompileToFile
     end
   end
 end
-
