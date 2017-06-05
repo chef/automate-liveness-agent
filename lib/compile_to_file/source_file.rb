@@ -1,3 +1,4 @@
+# frozen_string_literal: false
 module CompileToFile
   class SourceFile
 
@@ -7,9 +8,9 @@ module CompileToFile
     #     foo = <<-EOH
     #     #{interpolated_thing}
     #     EOH
-    RUBY_COMMENT = /^\s*#[^{\n]*\n/.freeze
-    EMPTY_LINE = /^\n/.freeze
-    EMPTY_STRING = "".freeze
+    RUBY_COMMENT = /^\s*#[^{\n]*\n/
+    EMPTY_LINE = /^\n/
+    EMPTY_STRING = ""
 
     attr_reader :path
     attr_reader :swaps
@@ -55,4 +56,3 @@ module CompileToFile
 
   end
 end
-

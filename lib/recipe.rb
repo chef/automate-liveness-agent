@@ -1,3 +1,6 @@
+# frozen_string_literal: false
+# rubocop:disable Style/SpaceAroundOperators
+
 #  Copyright 2017 Chef Software, Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +14,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-# rubocop:disable Style/SpaceAroundOperators
 
 # exit early if we're running on an unsupported platform
 return unless %w(
@@ -237,7 +238,7 @@ if platform?('windows')
     Chef::Log.debug("Task hash #{task_hash}")
     Chef::Log.debug("Options hash #{options}")
 
-    return false if !task_hash
+    return false unless task_hash
 
     return false if task_hash[:TaskToRun] != options['TR']
     return false if task_hash[:RunAsUser] != options['RU']
@@ -250,14 +251,14 @@ if platform?('windows')
     # Need check interval somehow; possibly by diffing :NextRunTime and
     # :LastRunTime ("5/19/2017 3:52:00 AM") Use :ScheduleType to find
     # units ("One Time Only, Minute")
-    return true;
+    true
   end
 
   def make_command(task_action, options)
     cmd = "schtasks /#{task_action} "
     opts = options.keys.map do |option|
       opt = "/#{option} "
-      opt += "\"#{options[option].to_s.gsub('"', "\\\"")}\" " unless options[option] == ''
+      opt += "\"#{options[option].to_s.gsub('"', '\"')}\" " unless options[option] == ''
       opt
     end.join('')
 
@@ -293,7 +294,7 @@ if platform?('windows')
       'TN' => task_name,
       'RU' => 'SYSTEM',
       'RL' => 'HIGHEST',
-      'TR' => command
+      'TR' => command,
     }
   end
   #
@@ -321,7 +322,7 @@ SCRIPT_BODY
 
   cmd = make_command 'CREATE', options
 
-  Chef::Log.info("Task is setup already, skipping") if is_task_setup
+  Chef::Log.info('Task is setup already, skipping') if is_task_setup
 
   powershell_script "Setup scheduled task at #{run_interval} minutes" do
     code cmd
@@ -329,14 +330,13 @@ SCRIPT_BODY
   end
 
 else # Not windows
+  #
+  # All other platforms (not windows)
+  #
 
-#
-# All other platforms (not windows)
-#
-
-agent_init_script =
-  if platform?('freebsd')
-    <<'RC_SCRIPT'
+  agent_init_script =
+    if platform?('freebsd')
+      <<'RC_SCRIPT'
 #!/bin/sh
 #
 # PROVIDE: automate_liveness_agent
@@ -399,8 +399,8 @@ check_automate_liveness_agent_status() {
 
 run_rc_command "$1"
 RC_SCRIPT
-  elsif platform?('mac_os_x')
-    <<'PLIST'
+    elsif platform?('mac_os_x')
+      <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -435,8 +435,8 @@ RC_SCRIPT
 </dict>
 </plist>
 PLIST
-  elsif platform?('solaris2')
-    <<'INIT_SCRIPT'
+    elsif platform?('solaris2')
+      <<'INIT_SCRIPT'
 #!/sbin/sh
 
 SCRIPT="RUBYOPT='--disable-gems' RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500 /var/opt/chef/bin/automate-liveness-agent /var/opt/chef/etc/config.json"
@@ -480,8 +480,8 @@ case "$1" in
     echo "Usage: $0 {start|stop|restart}"
 esac
 INIT_SCRIPT
-  elsif platform?('aix')
-    <<'RC_SCRIPT'
+    elsif platform?('aix')
+      <<'RC_SCRIPT'
 #!/bin/ksh
 
 case "$1" in
@@ -500,8 +500,8 @@ restart )
         exit 1
 esac
 RC_SCRIPT
-  else # linux
-    <<'INIT_SCRIPT'
+    else # linux
+      <<'INIT_SCRIPT'
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          automate-liveness-agent
@@ -566,49 +566,49 @@ case "$1" in
     echo "Usage: $0 {start|stop|restart|status}"
 esac
 INIT_SCRIPT
-  end
+    end
 
-file agent_init_script_path do
-  content(agent_init_script)
-  mode 0744
-  owner admin_user
-  group admin_group
-  notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
-end
-
-if platform?('aix')
-  directory '/var/run' do
-    recursive true
-  end
-
-  link "/etc/rc.d/rc2.d/K999#{agent_service_name}" do
-    to agent_init_script_path
+  file agent_init_script_path do
+    content(agent_init_script)
+    mode 0744
     owner admin_user
     group admin_group
+    notifies :restart, "service[#{agent_service_name}]" unless platform?('windows')
   end
 
-  bash 'create-automate-service' do
-    code <<"SCRIPT"
+  if platform?('aix')
+    directory '/var/run' do
+      recursive true
+    end
+
+    link "/etc/rc.d/rc2.d/K999#{agent_service_name}" do
+      to agent_init_script_path
+      owner admin_user
+      group admin_group
+    end
+
+    bash 'create-automate-service' do
+      code <<"SCRIPT"
 mkssys -s automate_liveness_agent -u 0 -p /var/opt/chef/bin/automate-liveness-agent -S -n 15 -f 9 -a '/var/opt/chef/etc/config.json'
 SCRIPT
 
-    not_if 'lssrc -s automate_liveness_agent'
-  end
-end
-
-if platform?('solaris2')
-  service_manifest_path = '/var/svc/manifest/application/chef/automatelivenessagent.xml'
-
-  directory ::File.dirname(service_manifest_path) do
-    owner admin_user
-    group admin_group
-    recursive true
+      not_if 'lssrc -s automate_liveness_agent'
+    end
   end
 
-  bash 'import-solaris-service-manifest' do
-    action :nothing
-    notifies :restart, "service[#{agent_service_name}]"
-    code <<"SCRIPT"
+  if platform?('solaris2')
+    service_manifest_path = '/var/svc/manifest/application/chef/automatelivenessagent.xml'
+
+    directory ::File.dirname(service_manifest_path) do
+      owner admin_user
+      group admin_group
+      recursive true
+    end
+
+    bash 'import-solaris-service-manifest' do
+      action :nothing
+      notifies :restart, "service[#{agent_service_name}]"
+      code <<"SCRIPT"
 if svccfg list | grep automatelivenessagent; then
   svcadmin disable automatelivenessagent
   svcadmin delete automatelivenessagent
@@ -621,14 +621,14 @@ while ! svcs -x automatelivenessagent; do
   sleep 2
 done
 SCRIPT
-  end
+    end
 
-  file service_manifest_path do
-    mode 0744
-    owner admin_user
-    group admin_group
-    notifies :run, 'bash[import-solaris-service-manifest]', :immediately
-    content <<'SERVICE_MANIFEST'
+    file service_manifest_path do
+      mode 0744
+      owner admin_user
+      group admin_group
+      notifies :run, 'bash[import-solaris-service-manifest]', :immediately
+      content <<'SERVICE_MANIFEST'
 <?xml version='1.0'?>
 <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
 
@@ -675,31 +675,30 @@ SCRIPT
 </service>
 </service_bundle>
 SERVICE_MANIFEST
+    end
   end
-end
 
-service agent_service_name do
-  supports(
-    start: true,
-    stop: true,
-    restart: true,
-    status: true,
-    uninstall: false,
-    reload: false
-  )
+  service agent_service_name do
+    supports(
+      start: true,
+      stop: true,
+      restart: true,
+      status: true,
+      uninstall: false,
+      reload: false
+    )
 
-  if platform?('mac_os_x')
-    # There's no need to "start" the service on MacOS. The liveness agent is
-    # configured in scheduled_task_mode and runs via launchd on a scheduled
-    # 30 minute interval. {start,restart,stop} are all supported but
-    # unnecessary.
-    action :enable
-  elsif platform?('aix')
-    # AIX doesn't support enabling services so we'll just start it
-    action :start
-  else
-    action %i(enable start)
+    if platform?('mac_os_x')
+      # There's no need to "start" the service on MacOS. The liveness agent is
+      # configured in scheduled_task_mode and runs via launchd on a scheduled
+      # 30 minute interval. {start,restart,stop} are all supported but
+      # unnecessary.
+      action :enable
+    elsif platform?('aix')
+      # AIX doesn't support enabling services so we'll just start it
+      action :start
+    else
+      action %i(enable start)
+    end
   end
-end
-
 end

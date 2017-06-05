@@ -1,0 +1,19 @@
+---
+AllCops:
+  TargetRubyVersion: 2.3
+  DisplayCopNames: true
+  Exclude:
+    - 'bin/*'
+    - 'lib/automate_liveness_agent*'
+    - 'lib/automate_liveness_agent*/**/**'
+    - 'lib/compile_to_file*'
+    - 'lib/compile_to_file*/**/**'
+    - 'lib/proto**'
+    - 'build/*'
+    - 'spec/**/**'
+    - 'tasks/*'
+    - 'test/integration/**/**'
+    - 'test/cookbooks/liveness-agent-test/files/default/automate/app.rb'
+    - 'test/cookbooks/liveness-agent-test/recipes/compiled-recipe.rb'
+  Include:
+    - 'test/cookbooks/*'

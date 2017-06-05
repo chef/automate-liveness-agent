@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "json"
 require "logger"
 
@@ -7,16 +8,16 @@ module AutomateLivenessAgent
 
   class Config
 
-    DEFAULT_CONFIG_PATH = "/etc/chef/config.json".freeze
-    DEFAULT_VERIFY_MODE = "verify_peer".freeze
+    DEFAULT_CONFIG_PATH = "/etc/chef/config.json"
+    DEFAULT_VERIFY_MODE = "verify_peer"
 
-    STDOUT_STRING = "STDOUT".freeze
-    STDERR_STRING = "STDERR".freeze
+    STDOUT_STRING = "STDOUT"
+    STDERR_STRING = "STDERR"
 
     SIZE_512K = 1024 * 512
     SIZE_2K   = 1024 * 2
 
-    LOGGER_STRESS_MODE = "LOGGER_STRESS_MODE".freeze
+    LOGGER_STRESS_MODE = "LOGGER_STRESS_MODE"
 
     MANDATORY_CONFIG_SETTINGS = %w{
       chef_server_fqdn
@@ -251,7 +252,6 @@ module AutomateLivenessAgent
       else
         SIZE_512K
       end
-
     end
 
   end

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module CompileToFile
 
   class CodeSwapNotFound < StandardError
@@ -38,4 +39,3 @@ module CompileToFile
 
   end
 end
-

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 directory node['liveness-agent-test']['automate']['root_dir'] do
   recursive true
 end
@@ -23,6 +24,7 @@ ruby_block 'kill-faux-automate' do
     begin
       pidfile = node['liveness-agent-test']['automate']['pidfile']
       Process.kill('HUP', ::File.read(pidfile).strip.to_i) if ::File.exist?(pidfile)
+    # rubocop:disable Lint/HandleExceptions
     rescue Errno::ESRCH
     ensure
       FileUtils.rm(pidfile, force: true)

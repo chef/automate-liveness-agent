@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe AutomateLivenessAgent::LivenessUpdateSender do
 
   let(:install_check_file) { nil }

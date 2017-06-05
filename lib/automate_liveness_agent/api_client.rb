@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "automate_liveness_agent/version"
 require "automate_liveness_agent/config"
 require "openssl"
@@ -9,31 +10,31 @@ module AutomateLivenessAgent
 
   class APIClient
 
-    MIXLIB_AUTHN_PROTO_VERSION = "1.3".freeze
+    MIXLIB_AUTHN_PROTO_VERSION = "1.3"
 
-    APPLICATION_JSON = "application/json".freeze
+    APPLICATION_JSON = "application/json"
 
-    HTTP_METHOD = "POST".freeze
+    HTTP_METHOD = "POST"
 
     VALID_PROTOCOLS = %w{ http https }.freeze
 
     BASE_HEADERS = {
       "Accept" => APPLICATION_JSON,
       # TODO: should we configure the chef client version in the config?
-      "X-Chef-Version" => "13.0.0".freeze,
-      "User-Agent" => "Automate Liveness Agent #{AutomateLivenessAgent::VERSION}".freeze,
+      "X-Chef-Version" => "13.0.0",
+      "User-Agent" => "Automate Liveness Agent #{AutomateLivenessAgent::VERSION}",
       "Content-Type" => APPLICATION_JSON,
     }.freeze
 
-    DEBUG = "DEBUG".freeze
+    DEBUG = "DEBUG"
 
     RETRY_LIMIT = 5
 
-    ERROR = "Error".freeze
+    ERROR = "Error"
 
-    SUCCESS = "Success".freeze
+    SUCCESS = "Success"
 
-    HTTPS_SCHEME = "https".freeze
+    HTTPS_SCHEME = "https"
 
     attr_reader :config
     attr_reader :logger

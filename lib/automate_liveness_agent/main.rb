@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "automate_liveness_agent/config"
 require "automate_liveness_agent/liveness_update_sender"
 
@@ -30,13 +31,13 @@ module AutomateLivenessAgent
 
   class Main
 
-    USAGE = "Usage: automate-liveness-agent [config_file]".freeze
+    USAGE = "Usage: automate-liveness-agent [config_file]"
 
-    SUCCESS = [ 0, "".freeze ].freeze
+    SUCCESS = [ 0, "" ].freeze
 
-    PIDFILE_LOCATION = "/var/run/automate-liveness-agent.pid".freeze
+    PIDFILE_LOCATION = "/var/run/automate-liveness-agent.pid"
 
-    WRITE_MODE = "w".freeze
+    WRITE_MODE = "w"
 
     attr_reader :argv
     attr_reader :config_path
@@ -124,8 +125,8 @@ module AutomateLivenessAgent
       else
         Process.daemon if config.daemon_mode
         if @pidfile_handle
-         @pidfile_handle.write(Process.pid)
-         @pidfile_handle.close
+          @pidfile_handle.write(Process.pid)
+          @pidfile_handle.close
         end
         a.main_loop
       end

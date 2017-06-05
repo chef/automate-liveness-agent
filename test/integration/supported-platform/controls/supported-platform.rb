@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 org_name      = attribute("org_name", description: "The organization name")
 host          = attribute("host", description: "The data collector host")
 port          = attribute("port", description: "The data collector port")

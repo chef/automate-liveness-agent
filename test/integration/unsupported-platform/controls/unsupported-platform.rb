@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 kitchen_dir    = attribute("kitchen_dir", default: "/tmp/kitchen")
 client_rb      = File.join(kitchen_dir, "test-client.rb")
 client_attrs   = File.join(kitchen_dir, "test-attrs.json")

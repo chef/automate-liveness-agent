@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe AutomateLivenessAgent::Main do
 
   let(:argv) { [] }
@@ -245,4 +246,3 @@ RSpec.describe AutomateLivenessAgent::Main do
   end
 
 end
-
