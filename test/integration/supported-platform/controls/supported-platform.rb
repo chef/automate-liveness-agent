@@ -7,6 +7,7 @@ reset_url     = "#{root_url}/reset-pings"
 ping_url      = "#{root_url}/pings"
 kitchen_dir   = attribute("kitchen_dir", default: "/tmp/kitchen")
 windows       = attribute("windows", default: false)
+macos         = attribute("macos", default: false)
 client_rb     = File.join(kitchen_dir, "test-client.rb")
 client_attrs  = File.join(kitchen_dir, "test-attrs.json")
 sleep_seconds = attribute("sleep_seconds", default: "10")
@@ -15,6 +16,10 @@ log_file_path = "/var/log/chef/automate-liveness-agent/automate-liveness-agent.l
 client_cmd    =
   if windows
     "$env:CHEF_RUN_INTERVAL=1 ; chef-client -z -c #{client_rb} -j #{client_attrs}"
+  elsif macos
+    # The macos images have an older chef client built in so we have to specify
+    # the full path
+    "INTERVAL=2 /opt/chef/embedded/bin/chef-client -z -c #{client_rb} -j #{client_attrs}"
   else
     "INTERVAL=2 chef-client -z -c #{client_rb} -j #{client_attrs}"
   end

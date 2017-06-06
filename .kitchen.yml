@@ -608,6 +608,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos10912
+        macos: true
   - name: macos-10.10
     provisioner:
       require_chef_omnibus: 13.0.118
@@ -625,6 +626,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos1010
+        macos: true
   - name: macos-10.10-12
     provisioner:
       require_chef_omnibus: 12.20.3
@@ -641,6 +643,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos101012
+        macos: true
   - name: macos-10.11
     provisioner:
       require_chef_omnibus: 13.0.118
@@ -657,6 +660,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos1011
+        macos: true
   - name: macos-10.11-12
     provisioner:
       require_chef_omnibus: 12.20.3
@@ -673,6 +677,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos101112
+        macos: true
   - name: macos-10.12
     provisioner:
       require_chef_omnibus: 13.0.118
@@ -688,6 +693,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos1012
+        macos: true
   - name: macos-10.12-12
     provisioner:
       require_chef_omnibus: 12.20.3
@@ -703,6 +709,7 @@ platforms:
     verifier:
       attributes:
         org_name: macos101212
+        macos: true
 
   #
   # solaris
