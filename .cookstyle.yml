@@ -3,6 +3,11 @@ AllCops:
   TargetRubyVersion: 2.3
   DisplayCopNames: true
   Exclude:
+    - '**/Rakefile'
+    - '**/Gemfile'
+    - '**/Berksfile'
+    - '**/config.ru'
+    - '**/*.gemspec'
     - 'bin/*'
     - 'lib/automate_liveness_agent*'
     - 'lib/automate_liveness_agent*/**/**'
