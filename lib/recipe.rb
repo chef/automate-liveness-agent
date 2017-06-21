@@ -359,7 +359,7 @@ load_rc_config $name
 start_automate_liveness_agent() {
  if [ -f "$pidfile" ] && kill -0 `cat "$pidfile"`; then
     echo 'Service already running' >&2
-    return 1
+    return 0
   fi
   echo 'Starting service…' >&2
 
@@ -374,7 +374,7 @@ stop_automate_liveness_agent() {
   local pid=`cat $pidfile`
   if [ ! -f "$pidfile" ] || ! kill -0 "$pid"; then
     echo 'Service not running' >&2
-    return 1
+    return 0
   fi
   echo 'Stopping service…' >&2
   kill -15 "$pid"
@@ -509,7 +509,8 @@ RC_SCRIPT
 # Required-Stop:     $local_fs $network $named $time $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Description:       foo
+# Short-Description: Start the automate-liveness-agent at boot
+# Description:       Start the automate-liveness-agent at boot
 ### END INIT INFO
 
 SCRIPT="RUBYOPT='--disable-gems' RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500 /var/opt/chef/bin/automate-liveness-agent /var/opt/chef/etc/config.json"
@@ -520,7 +521,7 @@ PIDFILE=/var/run/automate-liveness-agent.pid
 start() {
   if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE"); then
     echo 'Service already running' >&2
-    return 1
+    return 0
   fi
   echo 'Starting service…' >&2
   su -c "$SCRIPT" $RUNAS
@@ -530,7 +531,7 @@ start() {
 stop() {
   if [ ! -f "$PIDFILE" ] || ! kill -0 $(cat "$PIDFILE"); then
     echo 'Service not running' >&2
-    return 1
+    return 0
   fi
   echo 'Stopping service…' >&2
   kill -15 $(cat "$PIDFILE")
