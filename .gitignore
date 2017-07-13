@@ -12,3 +12,4 @@
 /build/*
 */.kitchen/*
 /test/cookbooks/liveness-agent-test/recipes/compiled-recipe.rb
+/test/cookbooks/liveness-agent-test/recipes/stable-compiled-recipe.rb

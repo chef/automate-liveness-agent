@@ -9,22 +9,51 @@ kitchen_dir   = attribute("kitchen_dir", default: "/tmp/kitchen")
 windows       = attribute("windows", default: false)
 macos         = attribute("macos", default: false)
 client_rb     = File.join(kitchen_dir, "test-client.rb")
-client_attrs  = File.join(kitchen_dir, "test-attrs.json")
+stable_attrs  = File.join(kitchen_dir, "test-stable-attrs.json")
+current_attrs = File.join(kitchen_dir, "test-current-attrs.json")
 sleep_seconds = attribute("sleep_seconds", default: "10")
 sleep_cmd     = "sleep #{sleep_seconds}"
 log_file_path = "/var/log/chef/automate-liveness-agent/automate-liveness-agent.log"
-client_cmd    =
+stable_cmd    =
   if windows
-    "$env:CHEF_RUN_INTERVAL=1 ; chef-client -z -c #{client_rb} -j #{client_attrs}"
+    "$env:CHEF_RUN_INTERVAL=1 ; chef-client -z -c #{client_rb} -j #{stable_attrs}"
   elsif macos
     # The macos images have an older chef client built in so we have to specify
     # the full path
-    "INTERVAL=2 /opt/chef/embedded/bin/chef-client -z -c #{client_rb} -j #{client_attrs}"
+    "INTERVAL=2 /opt/chef/embedded/bin/chef-client -z -c #{client_rb} -j #{stable_attrs}"
   else
-    "INTERVAL=2 chef-client -z -c #{client_rb} -j #{client_attrs}"
+    "INTERVAL=2 chef-client -z -c #{client_rb} -j #{stable_attrs}"
+  end
+current_cmd   =
+  if windows
+    "$env:CHEF_RUN_INTERVAL=1 ; chef-client -z -c #{client_rb} -j #{current_attrs}"
+  elsif macos
+    # The macos images have an older chef client built in so we have to specify
+    # the full path
+    "INTERVAL=2 /opt/chef/embedded/bin/chef-client -z -c #{client_rb} -j #{current_attrs}"
+  else
+    "INTERVAL=2 chef-client -z -c #{client_rb} -j #{current_attrs}"
   end
 
 control "setup-001" do
+  desc "setup"
+  title "converge previous stable version"
+
+  describe command(stable_cmd) do
+    its("exit_status") { should eq(0) }
+  end
+end
+
+control "test-001" do
+  desc "converge"
+  title "upgrade by converging the compiled recipe artifact"
+
+  describe command(current_cmd) do
+    its("exit_status") { should eq(0) }
+  end
+end
+
+control "setup-002" do
   desc "setup"
   title "reset the automate ping counter"
 
@@ -34,16 +63,7 @@ control "setup-001" do
   end
 end
 
-control "test-001" do
-  desc "converge"
-  title "converge the compiled recipe artifact"
-
-  describe command(client_cmd) do
-    its("exit_status") { should eq(0) }
-  end
-end
-
-control "test-002" do
+control "setup-003" do
   desc "wait"
   title "sleep to let the liveness agent send some pings"
 
@@ -52,7 +72,7 @@ control "test-002" do
   end
 end
 
-control "test-003" do
+control "test-002" do
   desc "verify pings"
   title "verify that the pings count has increased"
 
@@ -62,16 +82,16 @@ control "test-003" do
   end
 end
 
-control "test-004" do
+control "test-003" do
   desc "verify re-convergence"
   title "verify that the recipe can converge again without error"
 
-  describe command(client_cmd) do
+  describe command(current_cmd) do
     its("exit_status") { should eq(0) }
   end
 end
 
-control "test-005" do
+control "test-004" do
   desc "verify logging"
   title "verify that the agent is logging correctly"
 
