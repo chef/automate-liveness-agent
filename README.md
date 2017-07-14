@@ -121,7 +121,7 @@ bundle exec rspec
 To test the compiled recipe on a target platform:
 
 ```
-rake compile_recipe
+rake compile_recipe vendor_stable_recipe
 kitchen converge required-faux-chef-automate
 kitchen test $target-platform
 ```

@@ -6,6 +6,7 @@ require "rspec/core/rake_task"
 Dir["tasks/*"].each { |t| load t }
 
 task :default => :travis
+
 task :spec => :compile
 RSpec::Core::RakeTask.new(:spec)
 

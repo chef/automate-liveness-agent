@@ -12,26 +12,13 @@ TEST_BUILD_ARTIFACT=1 bundle exec rake
 
 #### Kitchen Acceptance Tests
 
-Run the full kitchen acceptance suite
+Run the full kitchen acceptance suite to verify recipe upgrade, convergence,
+re-convergence, and liveness agent logging and pings.
 
 ```
 rake compile_recipe
 kitchen converge automate
 kitchen test supported
-```
-
-#### Recipe and Init Script Testing
-
-##### Recipe Multi-Run Test
-
-Run this recipe at least 2x so we know it works continuously. This is tested
-during the integration suite.
-
-```
-kitchen test PLATFORM -d never
-kitchen login PLATFORM
-sudo -i
-INTERVAL=2 chef-client -z -c /tmp/kitchen/test-client.rb -j /tmp/kitchen/test-attrs.json
 ```
 
 ##### Init Script Acceptance Test
