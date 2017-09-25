@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = AutomateLivenessAgent::VERSION
   spec.authors       = ["danielsdeleo"]
   spec.email         = ["dan@chef.io"]
+  spec.license       = "Apache-2.0"
 
   spec.summary       = %q{Sends periodic keepalive messages to Chef Automate}
   spec.homepage      = "https://chef.io"
