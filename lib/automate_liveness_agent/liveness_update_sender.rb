@@ -46,7 +46,7 @@ module AutomateLivenessAgent
       end
     rescue Interrupt, SystemExit => e
       log("Signal received (#{e.inspect}), exiting")
-      return true
+      true
     end
 
     def update
