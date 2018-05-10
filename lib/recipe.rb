@@ -99,7 +99,12 @@ admin_user = value_for_platform_family(
     solaris2
     suse
   )           => 'root',
-  %i(windows) => 'administrator'
+  %i(windows) =>  if platform?('windows')
+                    # This class is only loaded on Windows
+                    Chef::ReservedNames::Win32::Security::SID.admin_account_name
+                  else
+                    'administrator'
+                  end
 )
 admin_group = value_for_platform_family(
   %i(aix)      => 'system',
