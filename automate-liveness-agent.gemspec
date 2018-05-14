@@ -36,5 +36,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "cookstyle"
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "automatiek"
+  # InSpec 2 has a blocking bug https://github.com/chef/inspec/issues/2822
+  spec.add_development_dependency "inspec", "< 2.0"
   spec.add_development_dependency "kitchen-inspec"
+  spec.add_development_dependency "kitchen-vagrant"
+  spec.add_development_dependency "berkshelf"
 end
