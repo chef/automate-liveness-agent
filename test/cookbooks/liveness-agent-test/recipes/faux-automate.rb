@@ -1,3 +1,5 @@
+ENV['PATH']=ENV['PATH']+':/opt/chef/embedded/bin'
+
 # frozen_string_literal: true
 directory node['liveness-agent-test']['automate']['root_dir'] do
   recursive true
