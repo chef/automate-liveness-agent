@@ -57,7 +57,7 @@ control "setup-002" do
   desc "setup"
   title "reset the automate ping counter"
 
-  describe http(reset_url) do
+  describe http(reset_url, enable_remote_worker: false) do
     its("status") { should cmp 200 }
     its("body") { should cmp "0" }
   end
@@ -76,7 +76,7 @@ control "test-002" do
   desc "verify pings"
   title "verify that the pings count has increased"
 
-  describe http(ping_url) do
+  describe http(ping_url, enable_remote_worker: false) do
     its("body") { should_not cmp "0" }
     its("status") { should eq(200) }
   end
