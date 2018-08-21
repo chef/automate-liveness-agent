@@ -280,10 +280,10 @@ platforms:
     attributes:
       liveness-agent-test:
         automate:
-          org_name: windows2008r2
+          org_name: windows2008r213
     verifier:
       attributes:
-        org_name: windows2008r2
+        org_name: windows2008r213
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -325,10 +325,10 @@ platforms:
     attributes:
       liveness-agent-test:
         automate:
-          org_name: windows2012r2
+          org_name: windows2012r213
     verifier:
       attributes:
-        org_name: windows2012r2
+        org_name: windows2012r213
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -371,10 +371,10 @@ platforms:
     attributes:
       liveness-agent-test:
         automate:
-          org_name: windows2016
+          org_name: windows201613
     verifier:
       attributes:
-        org_name: windows2016
+        org_name: windows201613
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
@@ -416,10 +416,10 @@ platforms:
     attributes:
       liveness-agent-test:
         automate:
-          org_name: windows8-1
+          org_name: windows8-113
     verifier:
       attributes:
-        org_name: windows8-1
+        org_name: windows8-113
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
