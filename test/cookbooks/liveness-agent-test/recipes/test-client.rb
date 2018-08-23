@@ -10,6 +10,7 @@ client_content = ::File.read(::File.join(kitchen_root, 'client.rb'))
 client_content << "\ndata_collector['server_url'] = '#{server_url}'"
 client_content << "\ndata_collector['mode'] = :both"
 client_content << "\ndata_collector['organization'] = '#{org_name}'"
+client_content << "\nlog_location \"c:\\\\chef-client-\#{Time.now.to_i}.log\""
 
 file ::File.join(kitchen_root, 'test-client.rb') do
   content client_content

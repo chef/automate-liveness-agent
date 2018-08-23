@@ -34,7 +34,6 @@ module AutomateLivenessAgent
     attr_reader :chef_server_fqdn
     attr_reader :client_key
     attr_reader :client_key_path
-    attr_reader :client_key
     attr_reader :client_name
     attr_reader :daemon_mode
     attr_reader :data_collector_url

@@ -15,6 +15,10 @@ cookbook_file node['liveness-agent-test']['automate']['app'] do
   source 'automate/app.rb'
 end
 
+apt_update
+
+package 'bundler'
+
 execute 'bundle install --binstubs' do
   cwd node['liveness-agent-test']['automate']['root_dir']
 end
