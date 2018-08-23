@@ -48,6 +48,7 @@ module AutomateLivenessAgent
     attr_reader :install_check_file
     attr_reader :log_file
     attr_reader :scheduled_task_mode
+    attr_reader :interval
 
     def self.load(config_path)
       c = new(config_path)
@@ -78,6 +79,7 @@ module AutomateLivenessAgent
       @install_check_file   = nil
       @log_file             = nil
       @scheduled_task_mode  = false
+      @interval             = nil
     end
 
     def load
@@ -149,6 +151,10 @@ module AutomateLivenessAgent
         sanity_check_daemon_mode(config_data["daemon_mode"])
       end
 
+      if config_data.key?("interval")
+        sanity_check_interval(config_data["interval"])
+      end
+
       @install_check_file   = config_data["install_check_file"]
       @log_file             = config_data["log_file"]
       @scheduled_task_mode  = config_data["scheduled_task_mode"]
@@ -217,6 +223,22 @@ module AutomateLivenessAgent
 
     def sanity_check_daemon_mode(mode)
       @daemon_mode = mode.is_a?(TrueClass) || mode == "true" ? true : false
+    end
+
+    def sanity_check_interval(seconds)
+      if seconds.is_a?(Integer)
+        @interval = seconds
+      elsif seconds.is_a?(String)
+        if seconds.scan(/\D/).empty?
+          @interval = seconds.to_i
+        else
+          raise ConfigError, "interval '#{seconds}' is not an integer"
+        end
+      elsif seconds.nil?
+        @interval = nil
+      else
+        raise ConfigError, "interval '#{seconds}' is not an integer"
+      end
     end
 
     def validate_and_normalize_log_path(log_path)

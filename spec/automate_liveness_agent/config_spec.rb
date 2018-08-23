@@ -355,4 +355,58 @@ RSpec.describe AutomateLivenessAgent::Config do
     end
 
   end
+
+  describe "setting the interval" do
+    context "when the interval is an integer" do
+      let(:config_data) do
+        BASE_CONFIG_DATA.merge("interval" => 60)
+      end
+
+      before do
+        config.apply_config_values(config_data)
+      end
+
+      it "sets the interval" do
+        expect(config.interval).to eq(60)
+      end
+    end
+
+    context "when the interval is a string of numbers" do
+      let(:config_data) do
+        BASE_CONFIG_DATA.merge("interval" => "65")
+      end
+
+      before do
+        config.apply_config_values(config_data)
+      end
+
+      it "sets the interval" do
+        expect(config.interval).to eq(65)
+      end
+    end
+
+    context "when the interval is a string that contains characters" do
+      let(:config_data) do
+        BASE_CONFIG_DATA.merge("interval" => "not seconds")
+      end
+
+      it "raises an error" do
+        expect { config.apply_config_values(config_data) }.to raise_error(AutomateLivenessAgent::ConfigError, /is not an integer/)
+      end
+    end
+
+    context "when the interval is nil" do
+      let(:config_data) do
+        BASE_CONFIG_DATA.merge("interval" => nil)
+      end
+
+      before do
+        config.apply_config_values(config_data)
+      end
+
+      it "sets the interval to nil" do
+        expect(config.interval).to eq(nil)
+      end
+    end
+  end
 end

@@ -52,6 +52,7 @@ run_interval      = ENV['CHEF_RUN_INTERVAL'] || 30 # (only windows), to ease tes
 server_uri        = URI(Chef::Config[:chef_server_url])
 trusted_certs_dir = File.directory?(Chef::Config[:trusted_certs_dir]) ? Chef::Config[:trusted_certs_dir] : nil
 daemon_mode       = platform?('windows') || platform?('aix') ? false : true
+interval          = ENV['INTERVAL']
 
 agent_service_name = value_for_platform_family(
   %i(
@@ -181,7 +182,8 @@ file agent_conf do
         'ssl_ca_file'         => Chef::Config[:ssl_ca_file],
         'ssl_ca_path'         => Chef::Config[:ssl_ca_path],
         'trusted_certs_dir'   => trusted_certs_dir,
-        'scheduled_task_mode' => platform?('windows') || platform?('mac_os_x')
+        'scheduled_task_mode' => platform?('windows') || platform?('mac_os_x'),
+        'interval'            => interval
       )
     end
   )

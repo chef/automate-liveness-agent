@@ -28,7 +28,7 @@ module AutomateLivenessAgent
       obj_counts = {}
       log("PROCESS ID: #{Process.pid}")
 
-      interval = (ENV["INTERVAL"] || UPDATE_INTERVAL_S).to_i
+      interval = (ENV["INTERVAL"] || config.interval || UPDATE_INTERVAL_S).to_i
       loop do
         if chef_uninstalled?
           log("Chef Client appears to have been uninstalled, shutting down")
