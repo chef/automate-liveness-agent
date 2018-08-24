@@ -57,7 +57,8 @@ platforms:
         org_name: debian711
   - name: debian-7.11-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     attributes:
       liveness-agent-test:
         automate:
@@ -75,7 +76,8 @@ platforms:
         org_name: debian87
   - name: debian-8.7-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     attributes:
       liveness-agent-test:
         automate:
@@ -96,7 +98,8 @@ platforms:
         org_name: ubuntu1204
   - name: ubuntu-12.04-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/ubuntu-12.04
     attributes:
@@ -108,7 +111,8 @@ platforms:
         org_name: ubuntu120412
   - name: ubuntu-14.04-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/ubuntu-12.04
     attributes:
@@ -136,7 +140,8 @@ platforms:
         org_name: ubuntu1604
   - name: ubuntu-16.04-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/ubuntu-16.04
     attributes:
@@ -156,7 +161,8 @@ platforms:
         org_name: ubuntu1610
   - name: ubuntu-16.10-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/ubuntu-16.10
     attributes:
@@ -179,7 +185,8 @@ platforms:
         org_name: centos511
   - name: centos-5.11-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/centos-5.11
     attributes:
@@ -199,7 +206,8 @@ platforms:
         org_name: centos68
   - name: centos-6.8-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/centos-6.8
     attributes:
@@ -219,7 +227,8 @@ platforms:
         org_name: centos73
   - name: centos-7.3-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/centos-7.3
     attributes:
@@ -244,7 +253,8 @@ platforms:
         org_name: amazonlinux
   - name: amazon-linux-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: mvbcoding/awslinux
     attributes:
@@ -257,9 +267,10 @@ platforms:
   #
   # windows
   #
-  - name: windows-2008-standard-14
+  - name: win-2008-std-14
     provisioner:
-      require_chef_omnibus: 14
+      product_name: chef
+      product_version: 14
     driver:
       box: chef/windows-server-2008r2-standard
     attributes:
@@ -272,9 +283,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2008-standard-13
+  - name: win-2008-std-13
     provisioner:
-      require_chef_omnibus: 13
+      product_name: chef
+      product_version: 13
     driver:
       box: chef/windows-server-2008r2-standard
     attributes:
@@ -287,9 +299,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2008-standard-12
+  - name: win-2008-std-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/windows-server-2008r2-standard
     attributes:
@@ -302,9 +315,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2012-standard-14
+  - name: win-2012-std-14
     provisioner:
-      require_chef_omnibus: 14
+      product_name: chef
+      product_version: 14
     driver:
       box: chef/windows-server-2012r2-standard
     attributes:
@@ -317,9 +331,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2012-standard-13
+  - name: win-2012-std-13
     provisioner:
-      require_chef_omnibus: 13
+      product_name: chef
+      product_version: 13
     driver:
       box: chef/windows-server-2012r2-standard
     attributes:
@@ -332,9 +347,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2012-standard-12
+  - name: win-2012-std-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/windows-server-2012r2-standard
     attributes:
@@ -348,9 +364,10 @@ platforms:
         windows: true
         sleep_seconds: 100
   # need to verify these are the best boxes to use
-  - name: windows-2016-standard-14
+  - name: win-2016-std-14
     provisioner:
-      require_chef_omnibus: 14
+      product_name: chef
+      product_version: 14
     driver:
       box: mwrock/Windows2016
     attributes:
@@ -363,9 +380,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2016-standard-13
+  - name: win-2016-std-13
     provisioner:
-      require_chef_omnibus: 13
+      product_name: chef
+      product_version: 13
     driver:
       box: mwrock/Windows2016
     attributes:
@@ -378,9 +396,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-2016-standard-12
+  - name: win-2016-std-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: mwrock/Windows2016
     attributes:
@@ -393,9 +412,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-8-1-standard-14
+  - name: win-8-1-std-14
     provisioner:
-      require_chef_omnibus: 14
+      product_name: chef
+      product_version: 14
     driver:
       box: chef/windows-8.1-enterprise
     attributes:
@@ -408,9 +428,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-8-1-standard-13
+  - name: win-8-1-std-13
     provisioner:
-      require_chef_omnibus: 13
+      product_name: chef
+      product_version: 13
     driver:
       box: chef/windows-8.1-enterprise
     attributes:
@@ -423,9 +444,10 @@ platforms:
         kitchen_dir: C:\\Users\\vagrant\\AppData\\Local\\Temp\\kitchen\\
         windows: true
         sleep_seconds: 100
-  - name: windows-8-1-standard-12
+  - name: win-8-1-std-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/windows-8.1-enterprise
     attributes:
@@ -453,7 +475,8 @@ platforms:
         org_name: freebsd103
   - name: freebsd-10.3-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/freebsd-10.3
     attributes:
@@ -473,7 +496,8 @@ platforms:
         org_name: freebsd11
   - name: freebsd-11.0-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/freebsd-11.0
     attributes:
@@ -496,7 +520,8 @@ platforms:
         org_name: fedora24
   - name: fedora-24-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/fedora-24
     attributes:
@@ -519,7 +544,8 @@ platforms:
         org_name: oracle511
   - name: oracle-5.11-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/oracle-5.11
     attributes:
@@ -539,7 +565,8 @@ platforms:
         org_name: oracle68
   - name: oracle-6.8-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/oracle-6.8
     attributes:
@@ -559,7 +586,8 @@ platforms:
         org_name: oracle73
   - name: oracle-7.3-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: bento/oracle-7.3
     attributes:
@@ -589,7 +617,8 @@ platforms:
         org_name: sles11sp2
   - name: sles-11-sp2-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/sles-11-sp2-x86_64
     attributes:
@@ -611,7 +640,8 @@ platforms:
         org_name: sles12
   - name: sles-12-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/sles-12-x86_64
     attributes:
@@ -633,7 +663,8 @@ platforms:
         org_name: sles12sp1
   - name: sles-12-sp1-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/sles-12-sp1-x86_64
     attributes:
@@ -662,7 +693,8 @@ platforms:
   - name: macos-10.9-12
     provisioner:
       # the last chef 12 version to support macos 10.9
-      require_chef_omnibus: 12.18.31
+      product_name: chef
+      product_version: 12.18.31
     driver:
       box: chef/macosx-10.9
       provider: vmware_fusion
@@ -679,7 +711,8 @@ platforms:
         macos: true
   - name: macos-10.10
     provisioner:
-      require_chef_omnibus: 13.0.118
+      product_name: chef
+      product_version: 13.0.118
     driver:
       box: chef/macosx-10.10
       provider: vmware_fusion
@@ -697,7 +730,8 @@ platforms:
         macos: true
   - name: macos-10.10-12
     provisioner:
-      require_chef_omnibus: 12.20.3
+      product_name: chef
+      product_version: 12.20.3
     driver:
       box: chef/macosx-10.10
       provider: vmware_fusion
@@ -714,7 +748,8 @@ platforms:
         macos: true
   - name: macos-10.11
     provisioner:
-      require_chef_omnibus: 13.0.118
+      product_name: chef
+      product_version: 13.0.118
     driver:
       box: chef/macosx-10.11
       provider: vmware_fusion
@@ -731,7 +766,8 @@ platforms:
         macos: true
   - name: macos-10.11-12
     provisioner:
-      require_chef_omnibus: 12.20.3
+      product_name: chef
+      product_version: 12.20.3
     driver:
       box: chef/macosx-10.11
       provider: vmware_fusion
@@ -748,7 +784,8 @@ platforms:
         macos: true
   - name: macos-10.12
     provisioner:
-      require_chef_omnibus: 13.0.118
+      product_name: chef
+      product_version: 13.0.118
     driver:
       box: chef/macos-10.12
       customize:
@@ -764,7 +801,8 @@ platforms:
         macos: true
   - name: macos-10.12-12
     provisioner:
-      require_chef_omnibus: 12.20.3
+      product_name: chef
+      product_version: 12.20.3
     driver:
       box: chef/macos-10.12
       customize:
@@ -794,7 +832,8 @@ platforms:
         org_name: solaris1011
   - name: solaris-10.11-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/solaris-10.11
     attributes:
@@ -816,7 +855,8 @@ platforms:
         org_name: solaris113
   - name: solaris-11.3-12
     provisioner:
-      require_chef_omnibus: 12
+      product_name: chef
+      product_version: 12
     driver:
       box: chef/solaris-11.3
     attributes:
@@ -861,15 +901,15 @@ suites:
       - centos-7.3-12
       - amazon-linux
       - amazon-linux-12
-      - windows-2008-standard-12
-      - windows-2008-standard-13
-      - windows-2008-standard-14
-      - windows-2012-standard-12
-      - windows-2012-standard-13
-      - windows-2012-standard-14
-      - windows-2016-standard-12
-      - windows-2016-standard-13
-      - windows-2016-standard-14
+      - win-2008-std-12
+      - win-2008-std-13
+      - win-2008-std-14
+      - win-2012-std-12
+      - win-2012-std-13
+      - win-2012-std-14
+      - win-2016-std-12
+      - win-2016-std-13
+      - win-2016-std-14
       # secondary platforms
       - freebsd-10.3
       - freebsd-10.3-12
@@ -889,9 +929,9 @@ suites:
       - sles-12-12
       - sles-12-sp1
       - sles-12-sp1-12
-      - windows-8-1-standard-12
-      - windows-8-1-standard-13
-      - windows-8-1-standard-14
+      - win-8-1-std-12
+      - win-8-1-std-13
+      - win-8-1-std-14
       - macos-10.9
       - macos-10.9-12
       - macos-10.10

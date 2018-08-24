@@ -70,6 +70,7 @@ Settings:
   Setting to `null` disables that
 * `unprivileged_gid`: Agent will change it's gid to this after start up.
   Setting to `null` disables that
+* `interval`: The number of seconds between agent checkins, defaults to 1800
 
 ### Environment Variables
 
