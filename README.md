@@ -32,7 +32,7 @@ The config file is a JSON formatted file like this:
   "install_check_file": "/opt/chef/embedded/bin/ruby",
   "log_file": "/var/log/chef/automate-liveness-agent/automate-liveness-agent.log",
   "org_name": "chef-oss-dev",
-  "scheduled_task_mode": false
+  "scheduled_task_mode": false,
   "ssl_ca_file": null,
   "ssl_ca_path": null,
   "ssl_verify_mode": "verify_peer",
