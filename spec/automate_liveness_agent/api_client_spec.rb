@@ -90,8 +90,8 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
       it "raises a ConfigError" do
         expected_message = "Private key '#{client_key_path}' is malformed (Neither PUB key nor PRIV key: nested asn1 error)"
-        expect { api_client.load_and_verify_config }.
-          to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
       end
 
     end
@@ -102,8 +102,8 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
       it "raises a ConfigError" do
         expected_message = "Data Collector URL 'Lobster Bisque' is malformed (bad URI(is not URI?): Lobster Bisque)"
-        expect { api_client.load_and_verify_config }.
-          to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
       end
 
     end
@@ -114,8 +114,8 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
       it "raises a ConfigError" do
         expected_message = "Data Collector URL 'telnet://towel.blinkenlights.nl' is invalid: only 'http' and 'https' protocols are supported"
-        expect { api_client.load_and_verify_config }.
-          to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
+        expect { api_client.load_and_verify_config }
+          .to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
       end
 
     end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 desc "Run all lint checks"
-task :lint => "lint:check"
+task lint: "lint:check"
 
 namespace :lint do
   desc "Lint liveness agent with chefstyle"
@@ -25,8 +25,8 @@ namespace :lint do
   end
 
   desc "Run all lint checks"
-  task :check => %i{cookstyle chefstyle}
+  task check: %i{cookstyle chefstyle}
 
   desc "Autocorrect all lint issues"
-  task :auto => %i{cookstyle chefstyle}
+  task auto: %i{cookstyle chefstyle}
 end

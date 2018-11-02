@@ -11,7 +11,7 @@ RSpec.describe AutomateLivenessAgent::Config do
     "org_name"           => "default",
     "unprivileged_uid"   => 100,
     "unprivileged_gid"   => 100,
-  }
+  }.freeze
 
   let(:config_path) { "/path/to/config.json" }
 
@@ -114,8 +114,8 @@ RSpec.describe AutomateLivenessAgent::Config do
           let(:expected_message) { "Config file '#{config_path}' is missing mandatory setting(s): \"#{key}\"" }
 
           it "raises a ConfigError" do
-            expect { config.apply_config_values(config_data) }.
-              to raise_error(AutomateLivenessAgent::ConfigError, expected_message )
+            expect { config.apply_config_values(config_data) }
+              .to raise_error(AutomateLivenessAgent::ConfigError, expected_message )
           end
 
         end
@@ -130,8 +130,8 @@ RSpec.describe AutomateLivenessAgent::Config do
         end
 
         it "raises a ConfigError" do
-          expect { config.apply_config_values(config_data) }.
-            to raise_error(AutomateLivenessAgent::ConfigError, expected_message )
+          expect { config.apply_config_values(config_data) }
+            .to raise_error(AutomateLivenessAgent::ConfigError, expected_message )
         end
       end
 
