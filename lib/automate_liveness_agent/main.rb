@@ -57,13 +57,13 @@ module AutomateLivenessAgent
     end
 
     def run
-      Pipeline.new(self).
-        run(:handle_argv).
-        run(:load_config).
-        run(:set_privileges).
-        run(:setup_logger).
-        run(:send_keepalives).
-        finish
+      Pipeline.new(self)
+        .run(:handle_argv)
+        .run(:load_config)
+        .run(:set_privileges)
+        .run(:setup_logger)
+        .run(:send_keepalives)
+        .finish
     end
 
     def handle_argv

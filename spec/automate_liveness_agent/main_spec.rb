@@ -88,9 +88,9 @@ RSpec.describe AutomateLivenessAgent::Main do
     context "when config loading fails" do
 
       it "exits 1 with the error message" do
-        expect(AutomateLivenessAgent::Config).to receive(:load).
-          with(argv.first).
-          and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
+        expect(AutomateLivenessAgent::Config).to receive(:load)
+          .with(argv.first)
+          .and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
         expected = [ 1, "explanation of problem" ]
         expect(application.load_config).to eq(expected)
       end
@@ -163,9 +163,9 @@ RSpec.describe AutomateLivenessAgent::Main do
     context "with a valid configuration" do
 
       it "runs the update sender's main loop" do
-        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config, application.logger).
-          and_return(update_sender)
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new)
+          .with(application.config, application.logger)
+          .and_return(update_sender)
         expect(update_sender).to receive(:main_loop)
         expect(application.send_keepalives).to eq(described_class::SUCCESS)
       end
@@ -175,9 +175,9 @@ RSpec.describe AutomateLivenessAgent::Main do
     context "with an invalid key or URI" do
 
       it "exits 1 with the error message" do
-        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config, application.logger).
-          and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new)
+          .with(application.config, application.logger)
+          .and_raise(AutomateLivenessAgent::ConfigError, "explanation of problem")
         expected = [ 1, "explanation of problem" ]
         expect(application.send_keepalives).to eq(expected)
       end
@@ -205,9 +205,9 @@ RSpec.describe AutomateLivenessAgent::Main do
 
       it "runs the update sender's main loop and daemonizes" do
         expect(Process).to receive(:daemon).and_return(nil)
-        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config, application.logger).
-          and_return(update_sender)
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new)
+          .with(application.config, application.logger)
+          .and_return(update_sender)
         expect(update_sender).to receive(:main_loop)
         expect(application.send_keepalives).to eq(described_class::SUCCESS)
       end
@@ -234,9 +234,9 @@ RSpec.describe AutomateLivenessAgent::Main do
       end
 
       it "tells LivenessUpdateSender to make a single update instead of looping" do
-        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new).
-          with(application.config, application.logger).
-          and_return(update_sender)
+        expect(AutomateLivenessAgent::LivenessUpdateSender).to receive(:new)
+          .with(application.config, application.logger)
+          .and_return(update_sender)
         expect(update_sender).to receive(:update)
         expect(application.send_keepalives).to eq(described_class::SUCCESS)
       end

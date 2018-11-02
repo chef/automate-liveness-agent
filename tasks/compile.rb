@@ -20,8 +20,8 @@ task :compile do
     })
     app.exe_file = "bin/automate-liveness-agent"
 
-    app.file("lib/automate_liveness_agent/vendor/mixlib-authentication/lib/mixlib/authentication.rb").
-      swap.replace(<<-THIS).with(<<-THAT)
+    app.file("lib/automate_liveness_agent/vendor/mixlib-authentication/lib/mixlib/authentication.rb")
+      .swap.replace(<<-THIS).with(<<-THAT)
     begin
       require "mixlib/log"
       Mixlib::Authentication::Log.extend(Mixlib::Log)
