@@ -39,8 +39,8 @@ zypper_package "insserv-compat" do
   only_if { platform_family?("suse") && node["platform_version"].satisfies?(">= 15") }
 end
 
-liveness_agent = <<~'AUTOMATE_LIVENESS_AGENT'
-  #LIVENESS_AGENT
+liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
+#LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!("#!/usr/bin/env ruby", "#!#{Gem.ruby}")
 
