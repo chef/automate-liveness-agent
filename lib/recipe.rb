@@ -41,7 +41,7 @@ end
 
 # rubocop:disable Layout/IndentHeredoc
 # rubocop will do an invalid transformation here because it
-# cannot see what we're putting in #LIVENESS_AGENT as this gets
+# cannot see what we're putting in LIVENESS_AGENT as this gets
 # put in at our "compile" step, which is not what rubocop runs on.
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
@@ -379,7 +379,7 @@ else # Not windows
             echo 'Service already running' >&2
             return 0
           fi
-          echo 'Starting service…' >&2
+          echo 'Starting service...' >&2
 
           RUBYOPT="--disable-gems";
           RUBY_GC_HEAP_GROWTH_MAX_SLOTS=500;
@@ -394,7 +394,7 @@ else # Not windows
             echo 'Service not running' >&2
             return 0
           fi
-          echo 'Stopping service…' >&2
+          echo 'Stopping service...' >&2
           kill -15 "$pid"
           rm -f "$pidfile"
           echo 'Service stopped' >&2
@@ -541,7 +541,7 @@ RC_SCRIPT
             echo 'Service already running' >&2
             return 0
           fi
-          echo 'Starting service…' >&2
+          echo 'Starting service...' >&2
           su -c "$SCRIPT" $RUNAS
           echo 'Service started' >&2
         }
@@ -551,7 +551,7 @@ RC_SCRIPT
             echo 'Service not running' >&2
             return 0
           fi
-          echo 'Stopping service…' >&2
+          echo 'Stopping service...' >&2
           kill -15 $(cat "$PIDFILE")
           rm -f "$PIDFILE"
           echo 'Service stopped' >&2
