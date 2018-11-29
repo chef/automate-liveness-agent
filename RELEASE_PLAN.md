@@ -16,9 +16,9 @@ Run the full kitchen acceptance suite to verify recipe upgrade, convergence,
 re-convergence, and liveness agent logging and pings.
 
 ```
-rake compile_recipe
-kitchen converge automate
-kitchen test supported
+bundle exec rake compile_recipe
+bundle exec kitchen converge automate
+bundle exec kitchen test supported
 ```
 
 ##### Init Script Acceptance Test
