@@ -1,4 +1,11 @@
 ---
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false
+
 AllCops:
   TargetRubyVersion: 2.3
   DisplayCopNames: true
