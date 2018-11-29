@@ -1,5 +1,5 @@
 # frozen_string_literal: false
-# rubocop:disable Style/SpaceAroundOperators
+# rubocop:disable Layout/SpaceAroundOperators
 
 #  Copyright 2017 Chef Software, Inc.
 #
@@ -39,14 +39,9 @@ zypper_package "insserv-compat" do
   only_if { platform_family?("suse") && node["platform_version"].satisfies?(">= 15") }
 end
 
-# rubocop:disable Layout/IndentHeredoc
-# rubocop will do an invalid transformation here because it
-# cannot see what we're putting in LIVENESS_AGENT as this gets
-# put in at our "compile" step, which is not what rubocop runs on.
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 #LIVENESS_AGENT
 AUTOMATE_LIVENESS_AGENT
-# rubocop:enable Layout/IndentHeredoc
 liveness_agent.gsub!("#!/usr/bin/env ruby", "#!#{Gem.ruby}")
 
 agent_dir         = Chef::Config.platform_specific_path(
