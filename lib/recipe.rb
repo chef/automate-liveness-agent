@@ -36,7 +36,7 @@ return if platform?("solaris2") && node["platform_version"] !~ /^5.(10|11)$/
 # SLES 15 requires the insserv-compat package installed to configure the service
 # using systemctl
 zypper_package "insserv-compat" do
-  only_if { platform_family?("suse") && node["platform_version"].satisfies?(">= 15") }
+  only_if { platform_family?("suse") && node["platform_version"].to_f >= 15 }
 end
 
 liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
