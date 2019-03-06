@@ -2,6 +2,7 @@ language: ruby
 rvm:
   - 2.3.3
   - 2.4.1
+  - 2.5.0
 
 env:
   -
@@ -16,7 +17,7 @@ branches:
 matrix:
   exclude:
     # Only execute the linting checks once
-    - rvm: 2.3.3
+    - rvm: 2.5.0
       env: CHEFSTYLE=true
-    - rvm: 2.3.3
+    - rvm: 2.5.0
       env: COOKSTYLE=true
