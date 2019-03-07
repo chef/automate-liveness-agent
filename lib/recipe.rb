@@ -1,7 +1,7 @@
 # frozen_string_literal: false
 # rubocop:disable Layout/SpaceAroundOperators
 
-#  Copyright 2017 Chef Software, Inc.
+#  Copyright 2019 Chef Software, Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ file agent_conf do
         "client_name"         => node.name,
         "daemon_mode"					=> daemon_mode,
         "data_collector_url"  => Chef::Config[:data_collector][:server_url],
-        "entity_uuid"         => Chef::JSONCompat.parse(Chef::FileCache.load("data_collector_metadata.json"))["node_uuid"],
+        "entity_uuid"         => Chef::DataCollector::Messages.node_uuid,
         "install_check_file"  => Gem.ruby,
         "org_name"            => Chef::Config[:data_collector][:organization] || server_uri.path.split("/").last,
         "unprivileged_uid"    => platform?("windows") || platform?("aix") ? nil : Etc.getpwnam(agent_username).uid,

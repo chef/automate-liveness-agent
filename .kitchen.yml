@@ -217,27 +217,40 @@ platforms:
     verifier:
       attributes:
         org_name: centos6812
-  - name: centos-7.3
+  - name: centos-7.6
     attributes:
       liveness-agent-test:
         automate:
-          org_name: centos73
+          org_name: centos76
     verifier:
       attributes:
-        org_name: centos73
-  - name: centos-7.3-12
+        org_name: centos76
+  - name: centos-7.6-12
     provisioner:
       product_name: chef
       product_version: 12
     driver:
-      box: bento/centos-7.3
+      box: bento/centos-7.6
     attributes:
       liveness-agent-test:
         automate:
-          org_name: centos7312
+          org_name: centos7612
     verifier:
       attributes:
-        org_name: centos7312
+        org_name: centos7612
+  - name: centos-7.6-13
+    provisioner:
+      product_name: chef
+      product_version: 13
+    driver:
+      box: bento/centos-7.6
+    attributes:
+      liveness-agent-test:
+        automate:
+          org_name: centos7613
+    verifier:
+      attributes:
+        org_name: centos7613
   #
   # amazon linux
   #
@@ -897,8 +910,9 @@ suites:
       - centos-5.11-12
       - centos-6.8
       - centos-6.8-12
-      - centos-7.3
-      - centos-7.3-12
+      - centos-7.6
+      - centos-7.6-12
+      - centos-7.6-13
       - amazon-linux
       - amazon-linux-12
       - win-2008-std-12
