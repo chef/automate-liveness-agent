@@ -183,6 +183,7 @@ file agent_conf do
         "client_name"         => node.name,
         "daemon_mode"         => daemon_mode,
         "data_collector_url"  => Chef::Config[:data_collector][:server_url],
+        # the Chef::DataCollector::Messages API here is Chef < 15.0 backcompat and can be removed when Chef 14.x is no longer supported
         "entity_uuid"         => node[:chef_guid] || defined?(Chef::DataCollector::Messages) && Chef::DataCollector::Messages.node_uuid,
         "install_check_file"  => Gem.ruby,
         "org_name"            => Chef::Config[:data_collector][:organization] || server_uri.path.split("/").last,
