@@ -44,6 +44,8 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!("#!/usr/bin/env ruby", "#!#{Gem.ruby}")
 
+#MACOS_PROVIDER
+
 agent_dir         = Chef::Config.platform_specific_path(
   platform?("windows") ? "c:/chef" : "/var/opt/chef/")
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, "bin")
@@ -145,11 +147,19 @@ agent_user_shell = value_for_platform_family(
   %i{windows}  => nil
 )
 
-# The windows_user resource isn't idempotent
+use_special_macos_user = platform?("mac_os_x") && (Gem::Version.new(node["platform_version"]) >= Gem::Version.new("10.14"))
+
+liveness_agent_macos_user agent_username do
+  home agent_dir
+  shell agent_user_shell
+  only_if { use_special_macos_user }
+end
+
 user agent_username do
   home agent_dir
   shell agent_user_shell
-  not_if { platform?("windows") }
+  not_if { platform?("windows") } # The windows_user resource isn't idempotent
+  not_if { use_special_macos_user }
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|

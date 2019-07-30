@@ -34,13 +34,22 @@ THIS
 THAT
   end.compile_as("build/automate-liveness-agent")
 
+  CompileToFile::App.new do |app|
+    app.add_lib_files(%w{
+      macos/resource
+      macos/provider
+    })
+  end.compile_as("build/macos_shim_provider.rb")
+
 end
 
 desc "Compile the application into a recipe"
 task compile_recipe: [:compile] do
   compiled_agent = File.read(File.expand_path("./build/automate-liveness-agent"))
   recipe = File.read(File.expand_path("./lib/recipe.rb"))
+  macos_provider = File.read(File.expand_path("./build/macos_shim_provider.rb"))
   recipe.gsub!("#LIVENESS_AGENT", compiled_agent)
+  recipe.gsub!("#MACOS_PROVIDER", macos_provider)
   compiled_recipe = File.expand_path("./build/automate-liveness-recipe.rb")
   File.open(compiled_recipe, "w+") { |f| f.write(recipe) }
   File.chmod(0755, compiled_recipe)
