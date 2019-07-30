@@ -148,19 +148,17 @@ agent_user_shell = value_for_platform_family(
   %i{windows}  => nil
 )
 
-use_special_macos_user = platform?("mac_os_x") && (Gem::Version.new(node["platform_version"]) >= Gem::Version.new("10.14"))
-
-liveness_agent_macos_user agent_username do
-  home agent_dir
-  shell agent_user_shell
-  only_if { use_special_macos_user }
-end
-
-user agent_username do
-  home agent_dir
-  shell agent_user_shell
-  not_if { platform?("windows") } # The windows_user resource isn't idempotent
-  not_if { use_special_macos_user }
+if platform?("mac_os_x") && (Gem::Version.new(node["platform_version"]) >= Gem::Version.new("10.14"))
+  liveness_agent_macos_user agent_username do
+    home agent_dir
+    shell agent_user_shell
+  end
+else
+  user agent_username do
+    home agent_dir
+    shell agent_user_shell
+    not_if { platform?("windows") } # The windows_user resource isn't idempotent
+  end
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|
