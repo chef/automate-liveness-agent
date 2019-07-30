@@ -17,18 +17,18 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
   let(:config_data) do
     {
-      "chef_server_fqdn"   => "chef.example",
-      "client_key_path"    => client_key_path,
-      "client_name"        => "testnode.example.com",
+      "chef_server_fqdn" => "chef.example",
+      "client_key_path" => client_key_path,
+      "client_name" => "testnode.example.com",
       "data_collector_url" => data_collector_url,
-      "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
-      "org_name"           => "default",
-      "ssl_verify_mode"    => ssl_verify_mode,
-      "ssl_ca_file"        => ssl_ca_file,
-      "ssl_ca_path"        => ssl_ca_path,
-      "trusted_certs_dir"  => trusted_certs_dir,
-      "unprivileged_uid"   => 100,
-      "unprivileged_gid"   => 100,
+      "entity_uuid" => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+      "org_name" => "default",
+      "ssl_verify_mode" => ssl_verify_mode,
+      "ssl_ca_file" => ssl_ca_file,
+      "ssl_ca_path" => ssl_ca_path,
+      "trusted_certs_dir" => trusted_certs_dir,
+      "unprivileged_uid" => 100,
+      "unprivileged_gid" => 100,
     }
   end
 
@@ -101,9 +101,10 @@ RSpec.describe AutomateLivenessAgent::APIClient do
       let(:data_collector_url) { "Lobster Bisque" }
 
       it "raises a ConfigError" do
-        expected_message = "Data Collector URL 'Lobster Bisque' is malformed (bad URI(is not URI?): Lobster Bisque)"
         expect { api_client.load_and_verify_config }
-          .to raise_error(AutomateLivenessAgent::ConfigError, expected_message)
+          .to raise_error(AutomateLivenessAgent::ConfigError) do |err|
+            expect(err.message).to match(/is malformed/)
+          end
       end
 
     end
@@ -171,9 +172,9 @@ RSpec.describe AutomateLivenessAgent::APIClient do
 
         let(:error_response) do
           instance_double(Net::HTTPClientError,
-                          code: "400",
-                          message: message,
-                          body: response_body)
+            code: "400",
+            message: message,
+            body: response_body)
         end
 
         let(:exception) do

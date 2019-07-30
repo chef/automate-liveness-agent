@@ -27,5 +27,4 @@ AllCops:
     - 'test/integration/**/**'
     - 'test/cookbooks/liveness-agent-test/files/default/automate/app.rb'
     - 'test/cookbooks/liveness-agent-test/recipes/compiled-recipe.rb'
-  Include:
-    - 'test/cookbooks/*'
+    - 'test/cookbooks/liveness-agent-test/recipes/stable-compiled-recipe.rb'

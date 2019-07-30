@@ -29,9 +29,9 @@ task :compile do
       require "automate_liveness_agent/vendor/mixlib-authentication/lib/mixlib/authentication/null_logger"
       Mixlib::Authentication::Log.extend(Mixlib::Authentication::NullLogger)
     end
-THIS
+      THIS
     Mixlib::Authentication::Log.extend(Mixlib::Authentication::NullLogger)
-THAT
+      THAT
   end.compile_as("build/automate-liveness-agent")
 
   CompileToFile::App.new do |app|
@@ -49,7 +49,7 @@ task compile_recipe: [:compile] do
   recipe = File.read(File.expand_path("./lib/recipe.rb"))
   macos_provider = File.read(File.expand_path("./build/macos_shim_provider.rb"))
   recipe.gsub!("#LIVENESS_AGENT", compiled_agent)
-  recipe.gsub!("#MACOS_PROVIDER", macos_provider)
+  recipe.gsub!("# MACOS_PROVIDER", macos_provider)
   compiled_recipe = File.expand_path("./build/automate-liveness-recipe.rb")
   File.open(compiled_recipe, "w+") { |f| f.write(recipe) }
   File.chmod(0755, compiled_recipe)

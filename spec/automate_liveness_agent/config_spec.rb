@@ -3,14 +3,14 @@ RSpec.describe AutomateLivenessAgent::Config do
 
   BASE_CONFIG_DATA =
     {
-    "chef_server_fqdn"   => "chef.example",
-    "client_key_path"    => fixture("config/example.pem"),
-    "client_name"        => "testnode.example.com",
+    "chef_server_fqdn" => "chef.example",
+    "client_key_path" => fixture("config/example.pem"),
+    "client_name" => "testnode.example.com",
     "data_collector_url" => "https://chef.example/organizations/default/data-collector",
-    "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
-    "org_name"           => "default",
-    "unprivileged_uid"   => 100,
-    "unprivileged_gid"   => 100,
+    "entity_uuid" => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+    "org_name" => "default",
+    "unprivileged_uid" => 100,
+    "unprivileged_gid" => 100,
   }.freeze
 
   let(:config_path) { "/path/to/config.json" }
@@ -313,14 +313,14 @@ RSpec.describe AutomateLivenessAgent::Config do
 
     let(:config_data) do
       {
-        "client_key_path"    => client_key_path,
-        "client_name"        => "testnode.example.com",
-        "chef_server_fqdn"   => "chef.example",
+        "client_key_path" => client_key_path,
+        "client_name" => "testnode.example.com",
+        "chef_server_fqdn" => "chef.example",
         "data_collector_url" => "https://chef.example/organizations/default/data-collector",
-        "org_name"           => "deafault",
-        "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
-        "unprivileged_uid"   => 100,
-        "unprivileged_gid"   => 100,
+        "org_name" => "deafault",
+        "entity_uuid" => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+        "unprivileged_uid" => 100,
+        "unprivileged_gid" => 100,
       }
     end
 

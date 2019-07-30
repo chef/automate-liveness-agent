@@ -1,7 +1,8 @@
 # frozen_string_literal: false
 # rubocop:disable Layout/SpaceAroundOperators
+# rubocop:disable Layout/AlignHash
 
-#  Copyright 2019-2019, Chef Software Inc.
+#  ::Copyright 2019, Chef Software Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -44,7 +45,7 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!("#!/usr/bin/env ruby", "#!#{Gem.ruby}")
 
-#MACOS_PROVIDER
+# MACOS_PROVIDER
 
 agent_dir         = Chef::Config.platform_specific_path(
   platform?("windows") ? "c:/chef" : "/var/opt/chef/")
@@ -174,7 +175,7 @@ directory agent_log_dir do
 end
 
 file agent_bin do
-  mode 0755
+  mode "755"
   owner admin_user
   group admin_group
   content liveness_agent
@@ -182,7 +183,7 @@ file agent_bin do
 end
 
 file agent_conf do
-  mode 0755
+  mode "755"
   owner admin_user
   group admin_group
   content(
@@ -194,7 +195,7 @@ file agent_conf do
         "daemon_mode"         => daemon_mode,
         "data_collector_url"  => Chef::Config[:data_collector][:server_url],
         # the Chef::DataCollector::Messages API here is Chef < 15.0 backcompat and can be removed when Chef 14.x is no longer supported
-        "entity_uuid"         => node[:chef_guid] || defined?(Chef::DataCollector::Messages) && Chef::DataCollector::Messages.node_uuid,
+        "entity_uuid"         => node["chef_guid"] || defined?(Chef::DataCollector::Messages) && Chef::DataCollector::Messages.node_uuid,
         "install_check_file"  => Gem.ruby,
         "org_name"            => Chef::Config[:data_collector][:organization] || server_uri.path.split("/").last,
         "unprivileged_uid"    => platform?("windows") || platform?("aix") ? nil : Etc.getpwnam(agent_username).uid,
@@ -329,7 +330,7 @@ if platform?("windows")
   # We hide configuration details in this script; it was too much to
   # pass on the schtasks command line
   file scheduled_task_script do
-    mode 0755
+    mode "755"
     owner admin_user
     group admin_group
     content <<~"SCRIPT_BODY"
@@ -595,7 +596,7 @@ INIT_SCRIPT
 
   file agent_init_script_path do
     content(agent_init_script)
-    mode 0744
+    mode "744"
     owner admin_user
     group admin_group
     notifies :restart, "service[#{agent_service_name}]" unless platform?("windows")
@@ -649,7 +650,7 @@ SCRIPT
     end
 
     file service_manifest_path do
-      mode 0744
+      mode "744"
       owner admin_user
       group admin_group
       notifies :run, "bash[import-solaris-service-manifest]", :immediately

@@ -6,8 +6,7 @@ AllCops:
     - 'bin/*'
     - 'lib/recipe.rb'
     - 'lib/automate_liveness_agent/vendor/**/**'
+    - 'lib/macos/**'
     - 'spec/examples.txt'
     - 'build/*'
     - 'test/cookbooks/**/*'
-  Include:
-    - 'test/cookbooks/liveness-agent-test/files/default/automate/app.rb'
