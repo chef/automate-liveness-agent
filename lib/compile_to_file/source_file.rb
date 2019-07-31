@@ -8,8 +8,8 @@ module CompileToFile
     #     foo = <<-EOH
     #     #{interpolated_thing}
     #     EOH
-    RUBY_COMMENT = /^\s*#[^{\n]*\n/
-    EMPTY_LINE = /^\n/
+    RUBY_COMMENT = /^\s*#[^{\n]*\n/.freeze
+    EMPTY_LINE = /^\n/.freeze
     EMPTY_STRING = "".freeze
 
     attr_reader :path

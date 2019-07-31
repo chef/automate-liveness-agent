@@ -5,14 +5,14 @@ RSpec.describe AutomateLivenessAgent::LivenessUpdateSender do
 
   let(:config_data) do
     {
-      "client_key_path"    => fixture("config/example.pem"),
-      "client_name"        => "testnode.example.com",
-      "chef_server_fqdn"   => "chef.example",
+      "client_key_path" => fixture("config/example.pem"),
+      "client_name" => "testnode.example.com",
+      "chef_server_fqdn" => "chef.example",
       "data_collector_url" => "https://chef.example/organizations/default/data-collector",
-      "org_name"           => "default",
-      "unprivileged_uid"   => 100,
-      "unprivileged_gid"   => 100,
-      "entity_uuid"        => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
+      "org_name" => "default",
+      "unprivileged_uid" => 100,
+      "unprivileged_gid" => 100,
+      "entity_uuid" => "d4a509ca-bc15-422d-8a17-1f3903856bc4",
       "install_check_file" => install_check_file,
     }
   end

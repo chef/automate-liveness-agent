@@ -161,6 +161,7 @@ module AutomateLivenessAgent
       unless VALID_PROTOCOLS.include?(uri.scheme)
         raise ConfigError, "Data Collector URL '#{config.data_collector_url}' is invalid: only 'http' and 'https' protocols are supported"
       end
+
       @uri
     rescue URI::InvalidURIError => e
       raise ConfigError, "Data Collector URL '#{config.data_collector_url}' is malformed (#{e})"

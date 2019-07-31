@@ -1,7 +1,8 @@
 # frozen_string_literal: false
 # rubocop:disable Layout/SpaceAroundOperators
+# rubocop:disable Layout/AlignHash
 
-#  Copyright 2019-2019, Chef Software Inc.
+#  ::Copyright 2019, Chef Software Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -145,11 +146,18 @@ agent_user_shell = value_for_platform_family(
   %i{windows}  => nil
 )
 
-# The windows_user resource isn't idempotent
-user agent_username do
-  home agent_dir
-  shell agent_user_shell
-  not_if { platform?("windows") }
+if platform?("mac_os_x") && (Gem::Version.new(node["platform_version"]) >= Gem::Version.new("10.14"))
+  # MACOS_PROVIDER_COMPILER_ENTRY_POINT
+  liveness_agent_macos_user agent_username do
+    home agent_dir
+    shell agent_user_shell
+  end
+else
+  user agent_username do
+    home agent_dir
+    shell agent_user_shell
+    not_if { platform?("windows") } # The windows_user resource isn't idempotent
+  end
 end
 
 [agent_bin_dir, agent_etc_dir].each do |dir|
@@ -164,7 +172,7 @@ directory agent_log_dir do
 end
 
 file agent_bin do
-  mode 0755
+  mode "755"
   owner admin_user
   group admin_group
   content liveness_agent
@@ -172,7 +180,7 @@ file agent_bin do
 end
 
 file agent_conf do
-  mode 0755
+  mode "755"
   owner admin_user
   group admin_group
   content(
@@ -184,7 +192,7 @@ file agent_conf do
         "daemon_mode"         => daemon_mode,
         "data_collector_url"  => Chef::Config[:data_collector][:server_url],
         # the Chef::DataCollector::Messages API here is Chef < 15.0 backcompat and can be removed when Chef 14.x is no longer supported
-        "entity_uuid"         => node[:chef_guid] || defined?(Chef::DataCollector::Messages) && Chef::DataCollector::Messages.node_uuid,
+        "entity_uuid"         => node["chef_guid"] || defined?(Chef::DataCollector::Messages) && Chef::DataCollector::Messages.node_uuid,
         "install_check_file"  => Gem.ruby,
         "org_name"            => Chef::Config[:data_collector][:organization] || server_uri.path.split("/").last,
         "unprivileged_uid"    => platform?("windows") || platform?("aix") ? nil : Etc.getpwnam(agent_username).uid,
@@ -319,7 +327,7 @@ if platform?("windows")
   # We hide configuration details in this script; it was too much to
   # pass on the schtasks command line
   file scheduled_task_script do
-    mode 0755
+    mode "755"
     owner admin_user
     group admin_group
     content <<~"SCRIPT_BODY"
@@ -585,7 +593,7 @@ INIT_SCRIPT
 
   file agent_init_script_path do
     content(agent_init_script)
-    mode 0744
+    mode "744"
     owner admin_user
     group admin_group
     notifies :restart, "service[#{agent_service_name}]" unless platform?("windows")
@@ -639,7 +647,7 @@ SCRIPT
     end
 
     file service_manifest_path do
-      mode 0744
+      mode "744"
       owner admin_user
       group admin_group
       notifies :run, "bash[import-solaris-service-manifest]", :immediately

@@ -107,7 +107,7 @@ module AutomateLivenessAgent
     end
 
     def load_client_key
-      if !(File.exist?(client_key_path) && File.readable?(client_key_path))
+      unless File.exist?(client_key_path) && File.readable?(client_key_path)
         raise ConfigError,
           "Configured client_key_path '#{client_key_path}' does not exist or is not readable (current uid: #{Process.uid})"
       end
@@ -210,10 +210,10 @@ module AutomateLivenessAgent
     end
 
     def sanity_check_config_path
-      if !File.exist?(config_path)
+      unless File.exist?(config_path)
         raise ConfigError, "Config file '#{config_path}' does not exist or is not readable"
       end
-      if !File.readable?(config_path)
+      unless File.readable?(config_path)
         raise ConfigError, "Config file '#{config_path}' is not readable (current uid = #{Process.euid})"
       end
       if File.size(config_path) == 0
@@ -264,6 +264,7 @@ module AutomateLivenessAgent
       if File.exist?(log_path) && !File.writable?(log_path)
         raise ConfigError, "Log file '#{log_file}' (set by log_path config) is not writable by current user (uid: #{Process.uid})"
       end
+
       log_path
     end
 

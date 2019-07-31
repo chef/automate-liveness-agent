@@ -71,6 +71,7 @@ module AutomateLivenessAgent
 
     def chef_uninstalled?
       return false if config.install_check_file.nil?
+
       !File.exist?(config.install_check_file)
     end
   end

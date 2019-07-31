@@ -28,5 +28,5 @@ namespace :lint do
   task check: %i{cookstyle chefstyle}
 
   desc "Autocorrect all lint issues"
-  task auto: %i{cookstyle chefstyle}
+  task auto: %i{cookstyle_autocorrect chefstyle_autocorrect}
 end
