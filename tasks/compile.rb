@@ -48,8 +48,10 @@ task compile_recipe: [:compile] do
   compiled_agent = File.read(File.expand_path("./build/automate-liveness-agent"))
   recipe = File.read(File.expand_path("./lib/recipe.rb"))
   macos_provider = File.read(File.expand_path("./build/macos_shim_provider.rb"))
+  # indent the provider
+  macos_provider = macos_provider.lines.each_with_index.map { |l, i| l.prepend("  ") if i != 0; l }.join
   recipe.gsub!("#LIVENESS_AGENT", compiled_agent)
-  recipe.gsub!("# MACOS_PROVIDER", macos_provider)
+  recipe.gsub!("# MACOS_PROVIDER_COMPILER_ENTRY_POINT", macos_provider)
   compiled_recipe = File.expand_path("./build/automate-liveness-recipe.rb")
   File.open(compiled_recipe, "w+") { |f| f.write(recipe) }
   File.chmod(0755, compiled_recipe)

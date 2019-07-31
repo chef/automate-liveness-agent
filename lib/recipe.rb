@@ -45,8 +45,6 @@ liveness_agent = <<'AUTOMATE_LIVENESS_AGENT'
 AUTOMATE_LIVENESS_AGENT
 liveness_agent.gsub!("#!/usr/bin/env ruby", "#!#{Gem.ruby}")
 
-# MACOS_PROVIDER
-
 agent_dir         = Chef::Config.platform_specific_path(
   platform?("windows") ? "c:/chef" : "/var/opt/chef/")
 agent_bin_dir     = ChefConfig::PathHelper.join(agent_dir, "bin")
@@ -149,6 +147,7 @@ agent_user_shell = value_for_platform_family(
 )
 
 if platform?("mac_os_x") && (Gem::Version.new(node["platform_version"]) >= Gem::Version.new("10.14"))
+  # MACOS_PROVIDER_COMPILER_ENTRY_POINT
   liveness_agent_macos_user agent_username do
     home agent_dir
     shell agent_user_shell
