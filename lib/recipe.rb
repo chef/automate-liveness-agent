@@ -128,7 +128,12 @@ admin_group = value_for_platform_family(
     mac_os_x
   }            => "wheel",
   %i{solaris2} => "sys",
-  %i{windows}  => "Administrators"
+  %i{windows}  => if platform?("windows")
+                    # This class is only loaded on Windows
+                    Chef::ReservedNames::Win32::Security::SID.Administrators
+                  else
+                    "Administrators"
+                  end
 )
 agent_user_shell = value_for_platform_family(
   %i{aix}      => "/bin/ksh",
